@@ -1,6 +1,6 @@
+use klvm_rs::NodePtr;
 use num_bigint::ToBigInt;
 
-use klvm_rs::allocator::Allocator;
 use klvm_rs::reduction::EvalErr;
 
 use crate::classic::klvm::__type_compatibility__::{
@@ -12,16 +12,12 @@ pub struct TConvertOption {
     pub signed: bool,
 }
 
-pub fn int_from_bytes(
-    allocator: &Allocator,
-    b: Bytes,
-    option: Option<TConvertOption>,
-) -> Result<u64, EvalErr> {
+pub fn int_from_bytes(b: Bytes, option: Option<TConvertOption>) -> Result<u64, EvalErr> {
     if b.length() == 0 {
         return Ok(0);
     } else if b.length() * 8 > 64 {
         return Err(EvalErr(
-            allocator.null(),
+            NodePtr::NIL,
             "Cannot convert Bytes to Integer larger than 64bit. Use bigint_from_bytes instead."
                 .to_string(),
         ));

@@ -262,7 +262,8 @@ fn test_integer_0_to_klvm() {
     let mut allocator = Allocator::new();
     let klvm_target = convert_to_klvm_rs(&mut allocator, value).expect("ok");
     let empty: [u8; 0] = [];
-    assert_eq!(allocator.atom(klvm_target), &empty);
+    let atom = allocator.atom(klvm_target);
+    assert_eq!(atom.as_ref(), &empty);
 }
 
 #[test]

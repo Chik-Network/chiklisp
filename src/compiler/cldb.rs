@@ -608,12 +608,8 @@ fn hex_to_modern_sexp_inner(
             hex_to_modern_sexp_inner(allocator, symbol_table, srcloc.clone(), a)?,
             hex_to_modern_sexp_inner(allocator, symbol_table, srcloc, b)?,
         ))),
-        _ => convert_from_klvm_rs(allocator, srcloc, program).map_err(|_| {
-            EvalErr(
-                Allocator::null(allocator),
-                "klvm_rs allocator failed".to_string(),
-            )
-        }),
+        _ => convert_from_klvm_rs(allocator, srcloc, program)
+            .map_err(|_| EvalErr(NodePtr::NIL, "klvm_rs allocator failed".to_string())),
     }
 }
 

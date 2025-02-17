@@ -23,8 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-12, ubuntu-latest, windows-latest]
-        python: [3.8, 3.9, '3.10', 3.11]
+        os: [macos-13, ubuntu-latest, windows-latest]
+        python: [3.9, '3.10', 3.11]
 
     steps:
     - uses: actions/checkout@v3
@@ -51,19 +51,19 @@ jobs:
     - name: Install dependencies
       run: |
           python -m pip install --upgrade pip
-          python -m pip install maturin==1.1.0
+          python -m pip install maturin==1.7.0
 
     - name: Build MacOs with maturin on Python ${{ matrix.python }}
       if: startsWith(matrix.os, 'macos')
       env:
-        MACOSX_DEPLOYMENT_TARGET: '11.0'
+        MACOSX_DEPLOYMENT_TARGET: '13.0'
       run: |
         maturin build -i python --release --strip
 
     - name: Build Linux in manylinux_2_28 with maturin on Python ${{ matrix.python }}
       if: startsWith(matrix.os, 'ubuntu')
       run: |
-        docker run --rm -v $(pwd):/io ghcr.io/pyo3/maturin:v1.1.0 build --release --strip --manylinux 2_28
+        docker run --rm -v $(pwd):/io ghcr.io/pyo3/maturin:v1.7.0 build --release --strip --manylinux 2_28 --sdist
         # Refresh in case any ownerships changed.
         mv target target.docker && cp -r target.docker target
         # Ensure an empty .cargo-lock file exists.
@@ -141,7 +141,7 @@ jobs:
 
 
     - name: Verify recompilation of old sources match with new compiler
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: |
         set -x
         # Build cmd line tools
@@ -153,8 +153,8 @@ jobs:
 
         # Check that recompiling deployed puzzles match with their deployed hashes
         cp support/install_deps.sh support/verify_compiler_version.sh chik-blockchain
-        (cd chik-blockchain && python -m venv venv && . venv/bin/activate && pip install --upgrade pip && \
-          python -m pip install maturin==1.1.0 && \
+        (cd chik-blockchain && python -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && \
+          python -m pip install maturin==1.7.0 && \
           cd .. && pip install --no-index --find-links target/wheels/ klvm_tools_rs && \
           cd chik-blockchain && \
           # deps for manage_klvm.py
@@ -163,7 +163,7 @@ jobs:
           ./verify_compiler_version.sh ${KLVM_TOOLS_RS_VERSION} && ./activated.py python tools/manage_klvm.py check)
 
     - name: Test Classic command line tools with pytest
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: |
         python -m pip install pytest
         # This script installs the wheel built during this workflow.
@@ -172,7 +172,7 @@ jobs:
         (cd resources/tests/cmdline/tests && py.test cmds_test.py )
 
     - name: Verify recompilation of cl21 sources
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: |
         # We need chik-rs for the following.
         pip install chik-rs
@@ -183,7 +183,7 @@ jobs:
         (cd resources/tests && python check-recompiles.py)
 
     - name: Verify recompilation follows date and modification rules
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: |
         pip install --no-index --find-links wheel/target/wheels/ klvm_tools_rs
         python resources/tests/test-klvm-recompile-behavior.py
@@ -203,22 +203,22 @@ jobs:
         pytest tests
 
     - name: Run tests
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: cargo test --features=fuzz
 
     - name: Exhaustive assign tests
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: cargo test -- --include-ignored assign
 
     - name: Check coverage
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: |
         cargo install grcov
         rustup component add llvm-tools-preview
         python ./resources/coverage/run_coverage.py --require-percent 60
 
     - name: Build alpine wheel via docker
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.8')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
       run: |
         cd resources/alpine && docker build -t klvm-tools-rs-alpine .
         docker run -v ${GITHUB_WORKSPACE}:/root/klvm_tools_rs -t klvm-tools-rs-alpine sh /root/build-alpine.sh
