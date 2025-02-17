@@ -27,7 +27,7 @@ jobs:
         python: [3.9, '3.10', 3.11]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -36,7 +36,7 @@ jobs:
       with:
         toolchain: stable
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       name: Install Python ${{ matrix.python }}
       with:
         python-version: ${{ matrix.python }}
@@ -147,20 +147,27 @@ jobs:
         # Build cmd line tools
         PYO3_PYTHON=`which python` cargo build --release
 
-        # Grab chik-blockchain
-        rm -rf chik-blockchain
-        git clone https://github.com/Chik-Network/chik-blockchain
+        # Grab chik_puzzles
+        rm -rf chik_puzzles
+        git clone https://github.com/Chik-Network/chik_puzzles
 
         # Check that recompiling deployed puzzles match with their deployed hashes
-        cp support/install_deps.sh support/verify_compiler_version.sh chik-blockchain
-        (cd chik-blockchain && python -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && \
+        # chik_puzzles is the directory the repo is cloned in.  It contains a subdir
+        # called chik_puzzles_py, which is a bit confusing, but that's where the
+        # manage_klvm.py script is.  That's why the code below runs
+        # chik_puzzles_py/manage_klvm.py while being in ./chik_puzzles.
+        cp support/install_deps.sh support/verify_compiler_version.sh chik_puzzles
+        (cd chik_puzzles && python -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && \
           python -m pip install maturin==1.7.0 && \
           cd .. && pip install --no-index --find-links target/wheels/ klvm_tools_rs && \
-          cd chik-blockchain && \
+          cd chik_puzzles && \
           # deps for manage_klvm.py
-          pip install click typing_extensions chik_rs klvm && \
+          pip install click typing_extensions chik_rs klvm chik_puzzles_py && \
           export PYTHONPATH=${PYTHONPATH}:$(pwd) && \
-          ./verify_compiler_version.sh ${KLVM_TOOLS_RS_VERSION} && ./activated.py python tools/manage_klvm.py check)
+          ./verify_compiler_version.sh ${KLVM_TOOLS_RS_VERSION} && . .venv/bin/activate && \
+          echo "Running check" && \
+          python chik_puzzles_py/manage_klvm.py check && \
+          echo "Check successful")
 
     - name: Test Classic command line tools with pytest
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.9')
@@ -224,9 +231,9 @@ jobs:
         docker run -v ${GITHUB_WORKSPACE}:/root/klvm_tools_rs -t klvm-tools-rs-alpine sh /root/build-alpine.sh
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: wheels
+        name: wheels-${{ matrix.os }}-py-${{ matrix.python }}
         path: ./target/wheels/
 
   upload:
@@ -235,7 +242,7 @@ jobs:
     needs: build_wheels
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
@@ -250,9 +257,10 @@ jobs:
         python-version: "3.10"
 
     - name: Download artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: wheels
+        merge-multiple: true
+        pattern: wheels-*
         path: ./target/wheels/
 
     - name: Check for incompatible wheels and bail if found
@@ -290,7 +298,7 @@ jobs:
 
     - name: Configure AWS credentials
       if: steps.check_secrets.outputs.HAS_AWS_SECRET
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: arn:aws:iam::${{ secrets.CHIK_AWS_ACCOUNT_ID }}:role/installer-upload
         aws-region: us-west-2
@@ -307,10 +315,10 @@ jobs:
         done <<< "$FILES"
 
   fmt:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: cargo fmt
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
       - name: Install rust
@@ -323,9 +331,9 @@ jobs:
         run: cargo fmt -- --files-with-diff --check
 
   clippy:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -339,10 +347,10 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   unit_tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Unit tests
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 1
       - name: Install rust
@@ -356,7 +364,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1
         with:
             toolchain: stable
