@@ -158,7 +158,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 name = "chik-bls"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53dea95bd7dac1e69c59ef6839ecf30ff3fe29170c16c4aa00093be21e0d789e"
+checksum = "4948c28d6c6fea9c231b5188e489103b697fb82edf0683ba8825e6378ec03c2e"
 dependencies = [
  "blst",
  "chik-sha2",
@@ -174,7 +174,7 @@ dependencies = [
 name = "chik-sha2"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7020f53eeae8b4c24c5666165738173a167c6478e0c0a9e1c428a491a2e1383d"
+checksum = "c2f9b5665ca9c2f737eb6033320eb03124fe54730ad51de094271d7e2d32877f"
 dependencies = [
  "sha2 0.10.8",
 ]
@@ -183,7 +183,7 @@ dependencies = [
 name = "chik-traits"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e57bbde886b38a9a5df185e751d90e295d14e99659bf43df7fa701d52d4da1ea"
+checksum = "49a09f1f25468aeb0d29f5cc7165142ad483743cdd53bf79f8e77bb731522775"
 dependencies = [
  "chik-sha2",
  "chik_streamable_macro",
@@ -194,7 +194,7 @@ dependencies = [
 name = "chik_streamable_macro"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00e78b5981952d2383b08344fdc6e6f843e72cc9d502d46d1d2824c485b34694"
+checksum = "9223bf1db3fcb9385f9683941ffc65d4bc42e363275ea7579d11bf4f37a5b6d0"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -250,7 +250,7 @@ dependencies = [
 name = "klvmr"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1485694ccaae3198b921ce3dac1954235acadd971289bae970c030f0a4f66174"
+checksum = "a2fc64113605776e500cb6126311f87dc19d6b3e9b65b326fcf6f0aad5bd9d4a"
 dependencies = [
  "bitvec",
  "chik-bls",
