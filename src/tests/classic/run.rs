@@ -1,7 +1,7 @@
 use num_bigint::ToBigInt;
 
 #[cfg(test)]
-use rand::distributions::Standard;
+use rand::distr::StandardUniform;
 #[cfg(test)]
 use rand::prelude::*;
 #[cfg(test)]
@@ -697,13 +697,13 @@ fn test_classic_mod_form() {
 pub fn random_klvm_number<R: Rng + ?Sized>(rng: &mut R) -> RandomKlvmNumber {
     // Make a number by creating some random atom bytes.
     // Set high bit randomly.
-    let natoms = rng.gen_range(0..=NUM_GEN_ATOMS);
+    let natoms = rng.random_range(0..=NUM_GEN_ATOMS);
     let mut result_bytes = Vec::new();
     for _ in 0..=natoms {
         let mut new_bytes = sexp::random_atom_name(rng, 3)
             .iter()
             .map(|x| {
-                if rng.gen() {
+                if rng.random() {
                     // The possibility of negative values.
                     x | 0x80
                 } else {
@@ -721,7 +721,7 @@ pub fn random_klvm_number<R: Rng + ?Sized>(rng: &mut R) -> RandomKlvmNumber {
 }
 
 #[cfg(test)]
-impl Distribution<RandomKlvmNumber> for Standard {
+impl Distribution<RandomKlvmNumber> for StandardUniform {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> RandomKlvmNumber {
         random_klvm_number(rng)
     }
@@ -730,9 +730,9 @@ impl Distribution<RandomKlvmNumber> for Standard {
 // Finally add property based testing in here.
 #[test]
 fn test_encoding_properties() {
-    let mut rng = ChaChaRng::from_entropy();
+    let mut rng = ChaChaRng::from_os_rng();
     for _ in 1..=200 {
-        let number_spec: RandomKlvmNumber = rng.gen();
+        let number_spec: RandomKlvmNumber = rng.random();
 
         // We'll have it compile a constant value.
         // The representation of the number will come out most likely
@@ -799,7 +799,7 @@ fn stringize(sexp: &sexp::SExp) -> sexp::SExp {
 
 #[test]
 fn test_check_tricky_arg_path_random() {
-    let mut rng = ChaChaRng::from_entropy();
+    let mut rng = ChaChaRng::from_os_rng();
     // Make a very deep random sexp and make a path table in it.
     let random_tree = Rc::new(stringize(&sexp::random_sexp(&mut rng, SEXP_RNG_HORIZON)));
     let mut deep_tree = random_tree.clone();
@@ -809,7 +809,7 @@ fn test_check_tricky_arg_path_random() {
     let mut deep_path = bi_one();
     for _ in 1..=SEXP_DEPTH {
         deep_path *= 2_u32.to_bigint().unwrap();
-        if rng.gen() {
+        if rng.random() {
             deep_path |= bi_one();
             deep_tree = Rc::new(sexp::SExp::Cons(
                 random_tree.loc(),
@@ -2587,4 +2587,37 @@ fn test_big_operator_list() {
         .trim()
         .to_string();
     assert_eq!(result, target_output);
+}
+
+const KECCAK_TEST_SIG: &'static str = "\"baz(uint32,bool)\"";
+const KECCAK_TEST_RESULT: &'static str =
+    "0xcdcd77c0992ec5bbfc459984220f8c45084cc24d9b6efed1fae540db8de801d2";
+
+#[test]
+fn test_keccak_compilation() {
+    for p in [
+        "(mod X (keccak256 X))",
+        "(mod X (include *standard-cl-24*) (keccak256 X))",
+    ]
+    .iter()
+    {
+        let program = do_basic_run(&vec!["run".to_string(), p.to_string()]);
+        let result = do_basic_brun(&vec![
+            "brun".to_string(),
+            program,
+            KECCAK_TEST_SIG.to_string(),
+        ]);
+        assert_eq!(result.trim(), KECCAK_TEST_RESULT,);
+    }
+}
+
+#[test]
+fn test_keccak_opversion() {
+    let program = do_basic_run(&vec![
+        "run".to_string(),
+        "--operators-version".to_string(),
+        "1".to_string(),
+        "(mod () (keccak256 999))".to_string(),
+    ]);
+    assert_eq!(program.trim(), "FAIL: unimplemented operator 62");
 }

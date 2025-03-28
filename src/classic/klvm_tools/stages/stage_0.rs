@@ -1,5 +1,7 @@
 use klvm_rs::allocator::{Allocator, NodePtr};
-use klvm_rs::chik_dialect::{ChikDialect, NO_UNKNOWN_OPS};
+use klvm_rs::chik_dialect::{
+    ChikDialect, ENABLE_KECCAK, ENABLE_KECCAK_OPS_OUTSIDE_GUARD, NO_UNKNOWN_OPS,
+};
 use klvm_rs::core_ops::{op_cons, op_eq, op_first, op_if, op_listp, op_raise, op_rest};
 use klvm_rs::cost::Cost;
 use klvm_rs::dialect::{Dialect, OperatorSet};
@@ -13,12 +15,14 @@ use klvm_rs::reduction::{EvalErr, Reduction, Response};
 
 use klvm_rs::run_program::{run_program_with_pre_eval, PreEval};
 
+use crate::classic::klvm::OPERATORS_LATEST_VERSION;
+
 #[derive(Default)]
 pub struct RunProgramOption {
     pub max_cost: Option<Cost>,
     pub pre_eval_f: Option<PreEval>,
     pub strict: bool,
-    pub new_operators: bool,
+    pub operators_version: usize,
 }
 
 pub trait TRunProgram {
@@ -174,26 +178,36 @@ impl TRunProgram for DefaultProgramRunner {
         option: Option<RunProgramOption>,
     ) -> Response {
         let max_cost = option.as_ref().and_then(|o| o.max_cost).unwrap_or(0);
-        let new_operators = option.as_ref().map(|o| o.new_operators).unwrap_or_default();
+        let operators_version = option
+            .as_ref()
+            .map(|o| o.operators_version)
+            .unwrap_or(OPERATORS_LATEST_VERSION);
 
-        if new_operators {
-            run_program_with_pre_eval_dialect(
-                allocator,
-                &ChikDialect::new(NO_UNKNOWN_OPS),
-                program,
-                args,
-                max_cost,
-                option.and_then(|o| o.pre_eval_f),
-            )
-        } else {
-            run_program_with_pre_eval_dialect(
+        match operators_version {
+            0 => run_program_with_pre_eval_dialect(
                 allocator,
                 &OriginalDialect::new(NO_UNKNOWN_OPS),
                 program,
                 args,
                 max_cost,
                 option.and_then(|o| o.pre_eval_f),
-            )
+            ),
+            1 => run_program_with_pre_eval_dialect(
+                allocator,
+                &ChikDialect::new(NO_UNKNOWN_OPS),
+                program,
+                args,
+                max_cost,
+                option.and_then(|o| o.pre_eval_f),
+            ),
+            _ => run_program_with_pre_eval_dialect(
+                allocator,
+                &ChikDialect::new(NO_UNKNOWN_OPS | ENABLE_KECCAK | ENABLE_KECCAK_OPS_OUTSIDE_GUARD),
+                program,
+                args,
+                max_cost,
+                option.and_then(|o| o.pre_eval_f),
+            ),
         }
     }
 }

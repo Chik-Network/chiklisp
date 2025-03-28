@@ -1,5 +1,12 @@
 klvm_tools_rs
 =
+![GitHub](https://img.shields.io/github/license/Chik-Network/klvm_tools_rs?logo=Github)
+[![Coverage Status](https://coveralls.io/repos/github/Chik-Network/klvm_tools_rs/badge.svg?branch=base)](https://coveralls.io/github/Chik-Network/klvm_tools_rs?branch=base)
+![Build Crate](https://github.com/Chik-Network/klvm_tools_rs/actions/workflows/build-crate.yml/badge.svg)
+![Build Wheels](https://github.com/Chik-Network/klvm_tools_rs/actions/workflows/build-test.yml/badge.svg)
+
+![PyPI](https://img.shields.io/pypi/v/klvm_tools_rs?logo=pypi)
+[![Crates.io](https://img.shields.io/crates/v/klvm_tools_rs.svg)](https://crates.io/crates/klvm_tools_rs)
 
 Theory of operation of the modern compiler: ./HOW_CHIKLISP_IS_COMPILED.md
 -
