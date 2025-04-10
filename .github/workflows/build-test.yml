@@ -260,8 +260,13 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         merge-multiple: true
-        pattern: wheels-*
+        pattern: wheels-*-py-3.9
         path: ./target/wheels/
+
+    - name: List artifacts
+      run: |
+        ls -la target/wheels/
+        sha256sum target/wheels/*
 
     - name: Check for incompatible wheels and bail if found
       run: |
@@ -340,7 +345,7 @@ jobs:
           components: clippy
           override: true
       - name: clippy
-        run: cargo clippy --all -- -D warnings
+        run: cargo clippy --all -- -D warnings && cargo clippy --manifest-path wasm/Cargo.toml --all -- -D warnings
       - uses: giraffate/clippy-action@v1
         with:
           reporter: 'github-pr-review'
