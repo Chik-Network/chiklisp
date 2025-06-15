@@ -1,7 +1,5 @@
 use klvm_rs::allocator::{Allocator, NodePtr};
-use klvm_rs::chik_dialect::{
-    ChikDialect, ENABLE_KECCAK, ENABLE_KECCAK_OPS_OUTSIDE_GUARD, NO_UNKNOWN_OPS,
-};
+use klvm_rs::chik_dialect::{ChikDialect, ENABLE_KECCAK_OPS_OUTSIDE_GUARD, NO_UNKNOWN_OPS};
 use klvm_rs::core_ops::{op_cons, op_eq, op_first, op_if, op_listp, op_raise, op_rest};
 use klvm_rs::cost::Cost;
 use klvm_rs::dialect::{Dialect, OperatorSet};
@@ -202,7 +200,7 @@ impl TRunProgram for DefaultProgramRunner {
             ),
             _ => run_program_with_pre_eval_dialect(
                 allocator,
-                &ChikDialect::new(NO_UNKNOWN_OPS | ENABLE_KECCAK | ENABLE_KECCAK_OPS_OUTSIDE_GUARD),
+                &ChikDialect::new(NO_UNKNOWN_OPS | ENABLE_KECCAK_OPS_OUTSIDE_GUARD),
                 program,
                 args,
                 max_cost,
