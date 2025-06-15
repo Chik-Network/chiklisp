@@ -12,12 +12,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "allocator-api2"
-version = "0.2.21"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "683d7910e743518b0e34f1186f92494becacb047c7b6bf616c96772180fef923"
-
-[[package]]
 name = "arraydeque"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -115,43 +109,18 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "chik-bls"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4948c28d6c6fea9c231b5188e489103b697fb82edf0683ba8825e6378ec03c2e"
-dependencies = [
- "blst",
- "chik-sha2 0.15.0",
- "chik-traits 0.15.0",
- "hex",
- "hkdf",
- "lru",
- "sha2 0.10.8",
- "thiserror",
-]
-
-[[package]]
-name = "chik-bls"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e334d35aa61903826bdde48388700e1eb820d7fdf79486daeb1ddcd18a7ff80d"
 dependencies = [
  "blst",
- "chik-sha2 0.22.0",
- "chik-traits 0.22.0",
+ "chik-sha2",
+ "chik-traits",
  "hex",
  "hkdf",
  "linked-hash-map",
  "sha2 0.10.8",
  "thiserror",
-]
-
-[[package]]
-name = "chik-sha2"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c2f9b5665ca9c2f737eb6033320eb03124fe54730ad51de094271d7e2d32877f"
-dependencies = [
- "sha2 0.10.8",
 ]
 
 [[package]]
@@ -165,36 +134,13 @@ dependencies = [
 
 [[package]]
 name = "chik-traits"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49a09f1f25468aeb0d29f5cc7165142ad483743cdd53bf79f8e77bb731522775"
-dependencies = [
- "chik-sha2 0.15.0",
- "chik_streamable_macro 0.15.0",
- "thiserror",
-]
-
-[[package]]
-name = "chik-traits"
 version = "0.22.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d567aa78bb0c9c0f21bec123b14a5b25c10710387d04bec4cafe860be449859b"
 dependencies = [
- "chik-sha2 0.22.0",
- "chik_streamable_macro 0.22.0",
+ "chik-sha2",
+ "chik_streamable_macro",
  "thiserror",
-]
-
-[[package]]
-name = "chik_streamable_macro"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9223bf1db3fcb9385f9683941ffc65d4bc42e363275ea7579d11bf4f37a5b6d0"
-dependencies = [
- "proc-macro-crate",
- "proc-macro2",
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -211,10 +157,10 @@ dependencies = [
 
 [[package]]
 name = "klvm_tools_rs"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "binascii",
- "chik-bls 0.22.0",
+ "chik-bls",
  "klvmr",
  "do-notation",
  "getrandom 0.2.15",
@@ -239,7 +185,7 @@ dependencies = [
 
 [[package]]
 name = "klvm_tools_wasm"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "klvm_tools_rs",
  "klvmr",
@@ -252,14 +198,14 @@ dependencies = [
 
 [[package]]
 name = "klvmr"
-version = "0.13.1"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb48c806aad940f2aacb75a4a05e8666f8b124e5cf7f867b4ef83c177984813f"
+checksum = "4fe909d203d9181a8b6314af6e4f0af6095f0b940753b07587b58cfbbc094eba"
 dependencies = [
  "bitvec",
  "bumpalo",
- "chik-bls 0.15.0",
- "chik-sha2 0.15.0",
+ "chik-bls",
+ "chik-sha2",
  "hex",
  "hex-literal",
  "k256",
@@ -500,8 +446,6 @@ version = "0.15.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bf151400ff0baff5465007dd2f3e717f3fe502074ca563069ce3a6629d07b289"
 dependencies = [
- "allocator-api2",
- "equivalent",
  "foldhash",
 ]
 
@@ -652,15 +596,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "83e5106554cabc97552dcadf54f57560ae6af3276652f82ca2be06120dc4c5dc"
 dependencies = [
  "spin",
-]
-
-[[package]]
-name = "lru"
-version = "0.12.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "234cf4f4a04dc1f57e24b96cc0cd600cf2af460d4161ac5ecdd0af8e1f3b2a38"
-dependencies = [
- "hashbrown 0.15.2",
 ]
 
 [[package]]
