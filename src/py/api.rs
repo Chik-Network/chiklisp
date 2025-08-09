@@ -15,6 +15,7 @@ use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 
 use klvm_rs::allocator::Allocator;
+use klvm_rs::error::EvalErr;
 use klvm_rs::serde::node_to_bytes;
 
 use crate::classic::klvm::__type_compatibility__::{
@@ -126,10 +127,14 @@ fn run_klvm_compilation(
 
             // Get the text representation, which will go either to the output file
             // or result.
-            let mut hex_text = Bytes::new(Some(BytesFromType::Raw(node_to_bytes(
-                &allocator,
-                klvm_result,
-            )?)))
+            let mut hex_text = Bytes::new(Some(BytesFromType::Raw(
+                node_to_bytes(&allocator, klvm_result).map_err(|err| {
+                    PyException::new_err(match err {
+                        EvalErr::InternalError(_, e) => e.to_string(),
+                        _ => err.to_string(),
+                    })
+                })?,
+            )))
             .hex();
             let compiled = if let Some(output_file) = output {
                 // Write output with eol.

@@ -508,7 +508,7 @@ dependencies = [
 
 [[package]]
 name = "klvm_tools_rs"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "binascii",
  "chik-bls",
@@ -540,9 +540,9 @@ dependencies = [
 
 [[package]]
 name = "klvmr"
-version = "0.14.0"
+version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fe909d203d9181a8b6314af6e4f0af6095f0b940753b07587b58cfbbc094eba"
+checksum = "f2912d50a0b9e3519e71a188472c63b98df6d302c9466c567862a473b2f10068"
 dependencies = [
  "bitvec",
  "bumpalo",
@@ -559,6 +559,7 @@ dependencies = [
  "rand 0.8.5",
  "sha1",
  "sha3",
+ "thiserror",
 ]
 
 [[package]]

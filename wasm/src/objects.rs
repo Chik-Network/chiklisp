@@ -19,6 +19,7 @@ use klvm_tools_rs::compiler::klvm::{convert_from_klvm_rs, convert_to_klvm_rs, sh
 use klvm_tools_rs::compiler::prims::{primapply, primcons, primquote};
 use klvm_tools_rs::compiler::sexp::SExp;
 use klvm_tools_rs::compiler::srcloc::Srcloc;
+use klvmr::error::EvalErr;
 use klvmr::Allocator;
 
 use crate::api::{create_klvm_runner_err, get_next_id};
@@ -647,8 +648,11 @@ impl Program {
         let run_result = runner
             .run_program(&mut allocator, prog_classic, arg_classic, None)
             .map_err(|e| {
-                let err_str: &str = &e.1;
-                let err: JsValue = JsString::from(err_str).into();
+                let err_str = match e {
+                    EvalErr::InternalError(_, e) => e.to_string(),
+                    _ => e.to_string(),
+                };
+                let err: JsValue = JsString::from(err_str.as_str()).into();
                 err
             })?;
         let modern_result = convert_from_klvm_rs(&mut allocator, get_srcloc(), run_result.1)

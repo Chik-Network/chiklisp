@@ -1,5 +1,5 @@
 use klvm_rs::allocator::{Allocator, NodePtr};
-use klvm_rs::reduction::EvalErr;
+use klvm_rs::error::EvalErr;
 
 use crate::classic::klvm::sexp::enlist;
 use crate::classic::klvm_tools::node_path::NodePath;

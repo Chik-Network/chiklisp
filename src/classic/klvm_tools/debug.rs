@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use klvm_rs::allocator::{Allocator, NodePtr, SExp};
-use klvm_rs::reduction::EvalErr;
+use klvm_rs::error::EvalErr;
 
 use crate::classic::klvm::__type_compatibility__::{Bytes, BytesFromType, Stream};
 use crate::classic::klvm::serialize::sexp_to_stream;

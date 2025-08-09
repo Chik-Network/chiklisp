@@ -7,6 +7,7 @@ use std::rc::Rc;
 use klvm_rs::allocator;
 use klvm_rs::allocator::{Allocator, NodePtr};
 
+use klvm_rs::error::EvalErr;
 use num_bigint::ToBigInt;
 
 use sha2::Digest;
@@ -412,7 +413,13 @@ fn apply_op(
         .map_err(|e| {
             RunFailure::RunErr(
                 head.loc(),
-                format!("{} in {application} {wrapped_args}", e.1),
+                format!(
+                    "{} in {application} {wrapped_args}",
+                    match e {
+                        EvalErr::InternalError(_, e) => e.to_string(),
+                        _ => e.to_string(),
+                    }
+                ),
             )
         })
         .and_then(|v| convert_from_klvm_rs(allocator, head.loc(), v.1))
