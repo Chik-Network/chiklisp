@@ -1,12 +1,12 @@
 [package]
 name = "klvm_tools_wasm"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2018"
 authors = ["Art Yerkes <art.yerkes@gmail.com>"]
 description = "tools for working with chiklisp language; compiler, repl, python and wasm bindings"
-homepage = "https://prozacchiwawa.github.io/klvm_tools_rs/"
+homepage = "https://prozacchiwawa.github.io/chiklisp/"
 readme = "README.md"
-repository = "https://github.com/Chik-Network/klvm_tools_rs"
+repository = "https://github.com/Chik-Network/chiklisp"
 license = "MIT"
 keywords = ["chik", "chiklisp", "klvm"]
 categories = ["command-line-utilities"]
@@ -17,7 +17,7 @@ crate-type = ["cdylib"]
 path = "src/mod.rs"
 
 [dependencies]
-klvm_tools_rs = { path= "..", features = [] }
+chiklisp = { path= "..", features = [] }
 klvmr = { version = "0.16.0", features = ["pre-eval"] }
 wasm-bindgen = "=0.2.100"
 js-sys = "0.3.60"

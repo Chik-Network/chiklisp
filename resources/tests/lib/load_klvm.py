@@ -9,7 +9,7 @@ import tempfile
 from typing import List
 
 import pkg_resources
-from klvm_tools_rs import compile_klvm as compile_klvm_rust
+from chiklisp import compile_klvm as compile_klvm_rust
 
 from chik.types.blockchain_format.program import Program
 from chik.types.blockchain_format.serialized_program import SerializedProgram

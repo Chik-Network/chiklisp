@@ -6,7 +6,7 @@ from pathlib import Path
 from klvm.casts import int_to_bytes, int_from_bytes
 
 from klvm_rs import Program
-from klvm_tools_rs import compile_klvm
+from chiklisp import compile_klvm
 from klvm_tools.binutils import disassemble
 
 from klvm.EvalError import EvalError

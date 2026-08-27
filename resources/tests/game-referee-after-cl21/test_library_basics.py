@@ -9,9 +9,9 @@ from typing import List
 from pathlib import Path
 from klvm_rs import Program
 from lib.steprun import diag_run_klvm, compile_module_with_symbols
-from klvm_tools_rs import get_version
+from chiklisp import get_version
 
-print(f"klvm_tools_rs version is {get_version()}")
+print(f"chiklisp version is {get_version()}")
 #include_dirs = os.getcwd()
 include_dirs = [Path(__file__).parent, Path(__file__).parent.parent / "lib"]
 Program.set_run_unsafe_max_cost(11000000000)

@@ -1,49 +1,49 @@
-klvm_tools_rs
+chiklisp
 =
-![GitHub](https://img.shields.io/github/license/Chik-Network/klvm_tools_rs?logo=Github)
-[![Coverage Status](https://coveralls.io/repos/github/Chik-Network/klvm_tools_rs/badge.svg?branch=base)](https://coveralls.io/github/Chik-Network/klvm_tools_rs?branch=base)
-![Build Crate](https://github.com/Chik-Network/klvm_tools_rs/actions/workflows/build-crate.yml/badge.svg)
-![Build Wheels](https://github.com/Chik-Network/klvm_tools_rs/actions/workflows/build-test.yml/badge.svg)
+![GitHub](https://img.shields.io/github/license/Chik-Network/chiklisp?logo=Github)
+[![Coverage Status](https://coveralls.io/repos/github/Chik-Network/chiklisp/badge.svg?branch=base)](https://coveralls.io/github/Chik-Network/klvm_tools_rs?branch=base)
+![Build Crate](https://github.com/Chik-Network/chiklisp/actions/workflows/build-crate.yml/badge.svg)
+![Build Wheels](https://github.com/Chik-Network/chiklisp/actions/workflows/build-test.yml/badge.svg)
 
-![PyPI](https://img.shields.io/pypi/v/klvm_tools_rs?logo=pypi)
-[![Crates.io](https://img.shields.io/crates/v/klvm_tools_rs.svg)](https://crates.io/crates/klvm_tools_rs)
+![PyPI](https://img.shields.io/pypi/v/chiklisp?logo=pypi)
+[![Crates.io](https://img.shields.io/crates/v/chiklisp.svg)](https://crates.io/crates/klvm_tools_rs)
 
 Theory of operation of the modern compiler: ./HOW_CHIKLISP_IS_COMPILED.md
 -
 This repo can be installed via cargo
 
-    cargo install klvm_tools_rs
+    cargo install chiklisp
 
 or via pip
 
-    pip install klvm_tools_rs@git+https://github.com/Chik-Network/klvm_tools_rs.git@e17412032aa7d3b8b1d1f931893fb5802eee626a
+    pip install chiklisp@git+https://github.com/Chik-Network/klvm_tools_rs.git@e17412032aa7d3b8b1d1f931893fb5802eee626a
 
 Note: `pip` installs a subset of the tools installed by `cargo`, including `brun`, `run`, `opc` and `opd`.
 
 
 The most current version of the language is in the nightly branch:
 
-    [nightly](https://github.com/Chik-Network/klvm_tools_rs/tree/nightly)
+    [nightly](https://github.com/Chik-Network/chiklisp/tree/nightly)
 
 To install from a specific branch:
 
-    cargo install --no-default-features --git 'https://github.com/Chik-Network/klvm_tools_rs' --branch nightly
+    cargo install --no-default-features --git 'https://github.com/Chik-Network/chiklisp' --branch nightly
     
 To install a git checkout into your current python environment (must be in some kind of venv or conda environment):
 
-    git clone https://github.com/Chik-Network/klvm_tools_rs
-    cd klvm_tools_rs
+    git clone https://github.com/Chik-Network/chiklisp
+    cd chiklisp
     maturin develop
 
 Install from PYPI:
 
-    pip install -i https://pypi.chiknetwork.com/nightlies/ klvm_tools_rs
+    pip install -i https://pypi.chiknetwork.com/nightlies/ chiklisp
     
 Most people still compile chiklisp via python.  One way to set up compilation
 in that way is like this:
 
     import json
-    from klvm_tools_rs import compile_klvm
+    from chiklisp import compile_klvm
 
     def compile_module_with_symbols(include_paths,source):
         path_obj = Path(source)

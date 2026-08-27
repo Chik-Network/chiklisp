@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . $HOME/.cargo/env
-cd /root/klvm_tools_rs
+cd /root/chiklisp
 python3 -m venv venv
 source ./venv/bin/activate
 pip install maturin[patchelf]

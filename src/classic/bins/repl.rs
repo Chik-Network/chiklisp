@@ -6,10 +6,10 @@ use std::rc::Rc;
 
 use klvm_rs::allocator::Allocator;
 
-use klvm_tools_rs::compiler::compiler::DefaultCompilerOpts;
-use klvm_tools_rs::compiler::repl::Repl;
+use chiklisp::compiler::compiler::DefaultCompilerOpts;
+use chiklisp::compiler::repl::Repl;
 
-use klvm_tools_rs::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use chiklisp::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
 
 fn main() {
     let mut allocator = Allocator::new();

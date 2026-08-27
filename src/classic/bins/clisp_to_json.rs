@@ -3,12 +3,12 @@ extern crate klvmr as klvm_rs;
 use std::env;
 use std::rc::Rc;
 
-use klvm_tools_rs::compiler::compiler::DefaultCompilerOpts;
-use klvm_tools_rs::compiler::frontend::frontend;
-use klvm_tools_rs::compiler::sexp::parse_sexp;
-use klvm_tools_rs::compiler::srcloc::Srcloc;
+use chiklisp::compiler::compiler::DefaultCompilerOpts;
+use chiklisp::compiler::frontend::frontend;
+use chiklisp::compiler::sexp::parse_sexp;
+use chiklisp::compiler::srcloc::Srcloc;
 
-use klvm_tools_rs::util::ErrInto;
+use chiklisp::util::ErrInto;
 
 fn main() {
     let opts = Rc::new(DefaultCompilerOpts::new("*program*"));

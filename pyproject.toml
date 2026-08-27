@@ -7,13 +7,13 @@ bindings = "pyo3"
 features = ["extension-module"]
 
 [project]
-name = "klvm_tools_rs"
+name = "chiklisp"
 dynamic = ["version"]
 
 # - Reenable these when we switch over from klvm_tools.
 # [project.scripts]
-# brun = "klvm_tools_rs.cmds:brun"
-# run = "klvm_tools_rs.cmds:run"
-# opc = "klvm_tools_rs.cmds:opc"
-# opd = "klvm_tools_rs.cmds:opd"
-# cldb = "klvm_tools_rs.cmds:cldb"
+# brun = "chiklisp.cmds:brun"
+# run = "chiklisp.cmds:run"
+# opc = "chiklisp.cmds:opc"
+# opd = "chiklisp.cmds:opd"
+# cldb = "chiklisp.cmds:cldb"

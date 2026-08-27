@@ -6,14 +6,14 @@ use std::rc::Rc;
 
 use klvm_rs::allocator::Allocator;
 
-use klvm_tools_rs::compiler::compiler::DefaultCompilerOpts;
-use klvm_tools_rs::compiler::evaluate::{Evaluator, EVAL_STACK_LIMIT};
-use klvm_tools_rs::compiler::frontend::frontend;
-use klvm_tools_rs::compiler::sexp::parse_sexp;
-use klvm_tools_rs::compiler::srcloc::Srcloc;
+use chiklisp::compiler::compiler::DefaultCompilerOpts;
+use chiklisp::compiler::evaluate::{Evaluator, EVAL_STACK_LIMIT};
+use chiklisp::compiler::frontend::frontend;
+use chiklisp::compiler::sexp::parse_sexp;
+use chiklisp::compiler::srcloc::Srcloc;
 
-use klvm_tools_rs::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
-use klvm_tools_rs::util::ErrInto;
+use chiklisp::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use chiklisp::util::ErrInto;
 
 fn main() {
     let mut allocator = Allocator::new();

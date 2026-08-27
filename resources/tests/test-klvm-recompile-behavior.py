@@ -4,7 +4,7 @@ import shutil
 import stat
 import time
 import hashlib
-from klvm_tools_rs import compile_klvm
+from chiklisp import compile_klvm
 
 TESTDIR = 'testdir'
 COMPILED_HASH = '6956b7c3af37e220819dc6e4919e7a1058167192db8eec81714218c4c3d8286d'

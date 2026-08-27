@@ -17,26 +17,26 @@ use crate::jsval::{
     read_string_to_string_map, sexp_from_js_object,
 };
 use crate::objects::Program;
-use klvm_tools_rs::classic::klvm::__type_compatibility__::{
+use chiklisp::classic::klvm::__type_compatibility__::{
     Bytes, Stream, UnvalidatedBytesFromType,
 };
-use klvm_tools_rs::classic::klvm::serialize::sexp_to_stream;
-use klvm_tools_rs::classic::klvm_tools::klvmc::compile_klvm_inner;
-use klvm_tools_rs::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
-use klvm_tools_rs::compiler::cldb::{
+use chiklisp::classic::klvm::serialize::sexp_to_stream;
+use chiklisp::classic::klvm_tools::klvmc::compile_klvm_inner;
+use chiklisp::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use chiklisp::compiler::cldb::{
     hex_to_modern_sexp, CldbOverrideBespokeCode, CldbRun, CldbRunEnv, CldbRunnable,
     CldbSingleBespokeOverride,
 };
-use klvm_tools_rs::compiler::klvm::{convert_to_klvm_rs, start_step};
-use klvm_tools_rs::compiler::compiler::{
+use chiklisp::compiler::klvm::{convert_to_klvm_rs, start_step};
+use chiklisp::compiler::compiler::{
     extract_program_and_env, path_to_function, rewrite_in_program, DefaultCompilerOpts,
 };
-use klvm_tools_rs::compiler::comptypes::{CompileErr, CompilerOpts};
-use klvm_tools_rs::compiler::prims;
-use klvm_tools_rs::compiler::repl::Repl;
-use klvm_tools_rs::compiler::runtypes::RunFailure;
-use klvm_tools_rs::compiler::sexp::SExp;
-use klvm_tools_rs::compiler::srcloc::Srcloc;
+use chiklisp::compiler::comptypes::{CompileErr, CompilerOpts};
+use chiklisp::compiler::prims;
+use chiklisp::compiler::repl::Repl;
+use chiklisp::compiler::runtypes::RunFailure;
+use chiklisp::compiler::sexp::SExp;
+use chiklisp::compiler::srcloc::Srcloc;
 
 extern crate alloc;
 

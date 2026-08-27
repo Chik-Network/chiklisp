@@ -8,17 +8,17 @@ use std::rc::Rc;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use klvm_tools_rs::classic::klvm::__type_compatibility__::{
+use chiklisp::classic::klvm::__type_compatibility__::{
     bi_one, Bytes, Stream, UnvalidatedBytesFromType,
 };
-use klvm_tools_rs::classic::klvm::serialize::{
+use chiklisp::classic::klvm::serialize::{
     sexp_from_stream, sexp_to_stream, SimpleCreateKLVMObject,
 };
-use klvm_tools_rs::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
-use klvm_tools_rs::compiler::klvm::{convert_from_klvm_rs, convert_to_klvm_rs, sha256tree};
-use klvm_tools_rs::compiler::prims::{primapply, primcons, primquote};
-use klvm_tools_rs::compiler::sexp::SExp;
-use klvm_tools_rs::compiler::srcloc::Srcloc;
+use chiklisp::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use chiklisp::compiler::klvm::{convert_from_klvm_rs, convert_to_klvm_rs, sha256tree};
+use chiklisp::compiler::prims::{primapply, primcons, primquote};
+use chiklisp::compiler::sexp::SExp;
+use chiklisp::compiler::srcloc::Srcloc;
 use klvmr::error::EvalErr;
 use klvmr::Allocator;
 

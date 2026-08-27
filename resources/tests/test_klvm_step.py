@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 import json
-from klvm_tools_rs import start_klvm_program, compose_run_function
+from chiklisp import start_klvm_program, compose_run_function
 
 def do_nothing(p):
     pass

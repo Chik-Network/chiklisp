@@ -3,7 +3,7 @@ from pathlib import Path
 import binascii
 import json
 from klvm_tools.binutils import assemble, disassemble
-from klvm_tools_rs import start_klvm_program, compose_run_function, compile_klvm
+from chiklisp import start_klvm_program, compose_run_function, compile_klvm
 from chik.types.blockchain_format.program import Program
 
 def compile_module_with_symbols(include_paths,source):

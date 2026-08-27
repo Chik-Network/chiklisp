@@ -1,4 +1,4 @@
-use klvm_tools_rs::classic::klvm_tools::cmds::brun;
+use chiklisp::classic::klvm_tools::cmds::brun;
 use std::env;
 
 fn main() {

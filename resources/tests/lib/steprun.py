@@ -3,7 +3,7 @@ import binascii
 import json
 import os
 from pathlib import Path
-from klvm_tools_rs import start_klvm_program, compose_run_function, compile_klvm
+from chiklisp import start_klvm_program, compose_run_function, compile_klvm
 from klvm_tools.binutils import assemble
 from klvm_rs import Program
 

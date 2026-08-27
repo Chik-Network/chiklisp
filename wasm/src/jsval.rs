@@ -9,10 +9,10 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
 
-use klvm_tools_rs::classic::klvm::__type_compatibility__::{bi_zero, Bytes, BytesFromType};
-use klvm_tools_rs::compiler::sexp::SExp;
-use klvm_tools_rs::compiler::srcloc::{Srcloc, Until};
-use klvm_tools_rs::util::Number;
+use chiklisp::classic::klvm::__type_compatibility__::{bi_zero, Bytes, BytesFromType};
+use chiklisp::compiler::sexp::SExp;
+use chiklisp::compiler::srcloc::{Srcloc, Until};
+use chiklisp::util::Number;
 
 use wasm_bindgen::prelude::*;
 

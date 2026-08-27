@@ -4,7 +4,7 @@ import pkg_resources
 import shlex
 import sys
 import unittest
-from klvm_tools_rs import call_tool, launch_tool
+from chiklisp import call_tool, launch_tool
 
 
 # If the REPAIR environment variable is set, any tests failing due to

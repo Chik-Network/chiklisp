@@ -1,4 +1,4 @@
-from klvm_tools_rs import binutils
+from chiklisp import binutils
 from klvm_tools.binutils import assemble, disassemble
 from klvm_rs.program import Program
 from random import randint

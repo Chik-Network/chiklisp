@@ -1,6 +1,6 @@
 import sys
 
-from klvm_tools_rs.klvm_tools_rs import cmds
+from chiklisp.klvm_tools_rs import cmds
 
 
 # this dynamic bit of programming may look super-complicated,
