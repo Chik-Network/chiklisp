@@ -105,9 +105,9 @@ jobs:
         python -m pip install ./klvm_tools
 
         # Install chiklisp pkg as "klvm_tools_rs" for older test framework
-        pip uninstall -v -y klvm_tools_rs
+        #pip uninstall -v -y klvm_tools_rs
         pip install chiklisp
-        pip install -e ./tmp
+        #pip install -e ./tmp
 
 
     - name: Ensure klvm, klvm_rs, chiklisp are installed
