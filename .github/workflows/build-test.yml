@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-13, ubuntu-latest, windows-latest]
+        os: [macos-15-intel, ubuntu-latest, windows-latest]
         python: ['3.10', 3.11, 3.12]
 
     steps:
@@ -105,7 +105,7 @@ jobs:
         python -m pip install ./klvm_tools
 
         # Install chiklisp pkg as "klvm_tools_rs" for older test framework
-        pip uninstall -v -y klvm_tools_rs
+  #      pip uninstall -v -y klvm_tools_rs
         pip install chiklisp
         pip install -e ./tmp
 
