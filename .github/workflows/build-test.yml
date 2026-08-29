@@ -209,7 +209,7 @@ jobs:
 
     - name: Install pytest
       run: |
-        pip install pytest
+        pip install pytest pytest-asyncio
 
     - name: Run tests from klvm
       run: |
