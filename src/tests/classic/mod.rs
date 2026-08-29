@@ -1,3 +1,4 @@
+mod bitconst;
 mod bls;
 mod embed;
 mod klvmc;

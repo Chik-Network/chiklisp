@@ -9,16 +9,26 @@ use klvm_rs::allocator::Allocator;
 use chiklisp::compiler::compiler::DefaultCompilerOpts;
 use chiklisp::compiler::evaluate::{Evaluator, EVAL_STACK_LIMIT};
 use chiklisp::compiler::frontend::frontend;
+use chiklisp::compiler::optimize::get_optimizer;
 use chiklisp::compiler::sexp::parse_sexp;
 use chiklisp::compiler::srcloc::Srcloc;
+use chiklisp::compiler::BasicCompileContext;
 
 use chiklisp::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
 use chiklisp::util::ErrInto;
 
 fn main() {
-    let mut allocator = Allocator::new();
     let runner = Rc::new(DefaultProgramRunner::new());
     let opts = Rc::new(DefaultCompilerOpts::new("*program*"));
+    let optimizer = match get_optimizer(&Srcloc::start("*repl*"), opts.clone()) {
+        Ok(o) => o,
+        Err(e) => {
+            print!("failed to get optimizer {e:?}");
+            return;
+        }
+    };
+    let mut context =
+        BasicCompileContext::new(Allocator::new(), runner.clone(), HashMap::new(), optimizer);
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
         println!("give a chiklisp program to minify");
@@ -32,7 +42,7 @@ fn main() {
         .and_then(|program| {
             let e = Evaluator::new(opts.clone(), runner.clone(), program.helpers.clone());
             e.shrink_bodyform(
-                &mut allocator,
+                &mut context,
                 program.args.clone(),
                 &HashMap::new(),
                 program.exp,

@@ -17,12 +17,11 @@ use crate::jsval::{
     read_string_to_string_map, sexp_from_js_object,
 };
 use crate::objects::Program;
-use chiklisp::classic::klvm::__type_compatibility__::{
-    Bytes, Stream, UnvalidatedBytesFromType,
-};
+use chiklisp::classic::klvm::__type_compatibility__::{Bytes, Stream, UnvalidatedBytesFromType};
 use chiklisp::classic::klvm::serialize::sexp_to_stream;
 use chiklisp::classic::klvm_tools::klvmc::compile_klvm_inner;
-use chiklisp::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use chiklisp::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use chiklisp::compiler::CompileContextWrapper;
 use chiklisp::compiler::cldb::{
     hex_to_modern_sexp, CldbOverrideBespokeCode, CldbRun, CldbRunEnv, CldbRunnable,
     CldbSingleBespokeOverride,
@@ -32,6 +31,7 @@ use chiklisp::compiler::compiler::{
     extract_program_and_env, path_to_function, rewrite_in_program, DefaultCompilerOpts,
 };
 use chiklisp::compiler::comptypes::{CompileErr, CompilerOpts};
+use chiklisp::compiler::optimize::get_optimizer;
 use chiklisp::compiler::prims;
 use chiklisp::compiler::repl::Repl;
 use chiklisp::compiler::runtypes::RunFailure;
@@ -45,7 +45,8 @@ use lol_alloc::{FreeListAllocator, LockedAllocator};
 
 #[cfg(target_arch = "wasm32")]
 #[global_allocator]
-static ALLOCATOR: LockedAllocator<FreeListAllocator> = LockedAllocator::new(FreeListAllocator::new());
+static ALLOCATOR: LockedAllocator<FreeListAllocator> =
+    LockedAllocator::new(FreeListAllocator::new());
 struct JsRunStep {
     allocator: Allocator,
     cldbrun: CldbRun,
@@ -53,6 +54,8 @@ struct JsRunStep {
 
 struct JsRepl {
     allocator: RefCell<Allocator>,
+    runner: Rc<dyn TRunProgram>,
+    opts: Rc<dyn CompilerOpts>,
     repl: RefCell<Repl>,
 }
 
@@ -386,9 +389,7 @@ pub fn compose_run_function(
         _ => {
             return create_klvm_compile_failure(&CompileErr(
                 program.loc(),
-                format!(
-                    "could not find function with hash from symbols: {function_name}"
-                ),
+                format!("could not find function with hash from symbols: {function_name}"),
             ));
         }
     };
@@ -411,7 +412,7 @@ pub fn create_repl() -> i32 {
     let allocator = Allocator::new();
     let opts = Rc::new(DefaultCompilerOpts::new("*repl*"));
     let runner = Rc::new(DefaultProgramRunner::new());
-    let repl = Repl::new(opts, runner.clone());
+    let repl = Repl::new(opts.clone(), runner.clone());
     let new_id = get_next_id();
     let mut prim_map = HashMap::new();
 
@@ -427,6 +428,8 @@ pub fn create_repl() -> i32 {
                 new_id,
                 JsRepl {
                     allocator: RefCell::new(allocator),
+                    runner: runner.clone(),
+                    opts: opts.clone(),
                     repl: RefCell::new(repl),
                 },
             );
@@ -454,15 +457,23 @@ pub fn repl_run_string(repl_id: i32, input: String) -> JsValue {
     REPLS
         .with(|repls| {
             let repls = repls.borrow();
+            let loc = Srcloc::start("*repl*");
             if let Some(repl_container) = repls.get(&repl_id) {
                 let mut a_borrowed = repl_container.allocator.borrow_mut();
                 let a = a_borrowed.deref_mut();
                 let mut r_borrowed = repl_container.repl.borrow_mut();
                 let r = r_borrowed.deref_mut();
-                r.process_line(a, input)
+                let mut symbols = HashMap::new();
+                let mut wrapper = CompileContextWrapper::new(
+                    a,
+                    repl_container.runner.clone(),
+                    &mut symbols,
+                    get_optimizer(&loc, repl_container.opts.clone())?
+                );
+                r.process_line(&mut wrapper.context, input)
             } else {
                 Err(CompileErr(
-                    Srcloc::start("*repl*"),
+                    loc,
                     "no such repl".to_string(),
                 ))
             }
