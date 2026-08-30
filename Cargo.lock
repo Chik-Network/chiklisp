@@ -82,9 +82,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.17.0"
+version = "3.20.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1628fb46dfa0b37568d12e5edd512553eccf6a22a78e8bde00bb4aed84d5bdbf"
+checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
 
 [[package]]
 name = "cc"
@@ -135,6 +135,15 @@ name = "chik-sha2"
 version = "0.28.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d1743dcafb38967498f4005dd4ed2cf3032677450396887ed53eae9fbce40dc7"
+dependencies = [
+ "sha2",
+]
+
+[[package]]
+name = "chik-sha2"
+version = "0.34.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5910df90b2ad10ad285e7e1e893cde93d0a768a658ec55deda0e275abba1dd23"
 dependencies = [
  "sha2",
 ]
@@ -196,7 +205,7 @@ dependencies = [
 
 [[package]]
 name = "chiklisp"
-version = "0.4.4"
+version = "0.4.5"
 dependencies = [
  "binascii",
  "chik-bls 0.42.0",
@@ -220,6 +229,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "subprocess",
  "tempfile",
  "unicode-segmentation",
  "wasm-bindgen",
@@ -573,14 +583,14 @@ dependencies = [
 
 [[package]]
 name = "klvmr"
-version = "0.16.2"
+version = "0.16.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ab526951654bbae88efbeb00c7f19b60c883a2b7950dcd4e0b6678306ce9906"
+checksum = "d8bbf37e6a7a919fed7e3100afe09ca555ebcd746fa10888de5b9571db1abbce"
 dependencies = [
  "bitvec",
  "bumpalo",
  "chik-bls 0.28.2",
- "chik-sha2 0.28.2",
+ "chik-sha2 0.34.0",
  "hex",
  "hex-literal",
  "k256",
@@ -1188,6 +1198,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "subprocess"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3713691ac66e56ba6bafb8a62158859653b3127ae5cacae98d437bbb0c9ccb06"
+dependencies = [
+ "libc",
+ "winapi",
+]
+
+[[package]]
 name = "subtle"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1383,6 +1403,28 @@ checksum = "1f01b580c9ac74c8d8f0c0e4afb04eeef2acf145458e52c03845ee9cd23e3d12"
 dependencies = [
  "unicode-ident",
 ]
+
+[[package]]
+name = "winapi"
+version = "0.3.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419"
+dependencies = [
+ "winapi-i686-pc-windows-gnu",
+ "winapi-x86_64-pc-windows-gnu",
+]
+
+[[package]]
+name = "winapi-i686-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
+
+[[package]]
+name = "winapi-x86_64-pc-windows-gnu"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "windows-sys"
