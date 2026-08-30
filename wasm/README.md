@@ -17,6 +17,7 @@ Then build with
 
 ```bash
 # Make sure you're at <chiklisp root>/wasm
+export RUSTFLAGS='--cfg=getrandom_backend="unsupported" -Ctarget-cpu=mvp'
 wasm-pack build --release --target=nodejs
 ```
 

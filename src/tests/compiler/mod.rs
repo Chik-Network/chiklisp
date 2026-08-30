@@ -8,13 +8,11 @@ mod assign;
 #[cfg(feature = "preserved_043")]
 mod cl26_fuzz_compare;
 mod cldb;
-mod codegen_funcache;
 mod compiler;
 mod evaluate;
 mod fuzz;
 mod fuzz_assign;
 mod klvm;
-mod module_cache;
 mod modules;
 mod optimizer;
 mod preprocessor;

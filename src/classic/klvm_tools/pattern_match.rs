@@ -3,8 +3,8 @@ use crate::classic::klvm::sexp::equal_to;
 use klvm_rs::allocator::{Allocator, NodePtr, SExp};
 use std::collections::HashMap;
 
-pub const ATOM_MATCH: [u8; 1] = [b'$'];
-pub const SEXP_MATCH: [u8; 1] = [b':'];
+pub const ATOM_MATCH: [u8; 1] = *b"$";
+pub const SEXP_MATCH: [u8; 1] = *b":";
 
 pub fn unify_bindings(
     allocator: &mut Allocator,

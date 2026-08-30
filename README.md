@@ -191,4 +191,3 @@ Use with chik-blockchain
 
     # Activate your venv, then
     $ maturin develop --release
-
