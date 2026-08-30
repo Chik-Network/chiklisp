@@ -1,7 +1,34 @@
+//! Chiklisp compiler and some associated tools, such as a more informative debugger.
+//!
+//! klvm -- a klvm runner which allows klvm to be executed one step at a time, returning control
+//! to the caller.
+//!
+//! cldb -- cldb debugging using the klvm step runner.  it produces source coordinates for the
+//!
+//! klvm code being executed at each step.
+//!
+//! comptypes -- datastructure for representing and manipulating chiklisp programs.
+//!
+//! debug -- support for partly recovering debug information after passing klvm data through
+//! a less expressive data representation.
+//!
+//! evaluate -- an evaluator for the chiklisp language itself which can also partially evaluate
+//! chiklisp expressions.
+//!
+//! frontend -- process parsed klvm sexp into a representation of a chiklisp program.
+//!
+//! gensym -- simple unique name generator.
+//!
+//! inline -- support for transforming inline function calls to the fully expanded expression.
+//!
+//! lambda -- support for callable lambda function as expressions.
+//!
+//! optimize -- support for some kinds of optimization.
+
 /// Chiklisp debugging.
 pub mod cldb;
 pub mod cldb_hierarchy;
-mod codegen;
+pub mod codegen;
 /// CompilerOpts which is the main holder of toplevel compiler state.
 #[allow(clippy::module_inception)]
 pub mod compiler;
@@ -14,24 +41,47 @@ pub mod comptypes;
 pub mod debug;
 /// Utilities for chiklisp dialect choice
 pub mod dialect;
+/// An on-disk cache for compiled modules
+pub mod diskcache;
+/// Evaluate and partially evaluate chiklisp expressions
 pub mod evaluate;
+/// Turn chiklisp programs expressed as parsed klvm into data structures describing a chiklisp program.
 pub mod frontend;
+/// A generator which can expand klvm expressions randomly according to rules, allowing random
+/// programs and data structures to be generated.
 #[cfg(any(test, feature = "fuzz"))]
 pub mod fuzz;
+/// Gensym function which creates a new unused name.
 pub mod gensym;
+/// Support for inline functions.
 mod inline;
 /// KLVM running.
 pub mod klvm;
+/// Support for lambda functions with captures.
 mod lambda;
+/// Support for optimizing chiklisp.
 pub mod optimize;
+/// A fully independent prepreocessor step for chiklisp.
 pub mod preprocessor;
+/// Defined primitives which act as callable functions in the chiklisp language.
 pub mod prims;
+/// Renaming support for making shadowed names in chiklisp code unambiguous.
 pub mod rename;
+/// A repl using ```evaluate```.
 pub mod repl;
+/// A namespace resolver which uses (namespace ...) and (import ...) forms to assemble standard
+/// style compileforms from ones that use namespaces.  Helpers are retrieved from accessible
+/// namespaces and all references are rewritten to be fully qualified.
+pub mod resolve;
+/// Types related to running klvm code.
 pub mod runtypes;
+/// A flexible, full featured SExp object which preserves a source association and user intent.
 pub mod sexp;
+/// Support for preserving the association between klvm data and locations in the source code.
 pub mod srcloc;
+/// Support for limiting stack depth during evaluation.
 pub mod stackvisit;
+/// Support for determining whether program argument values will be used statically.
 pub mod usecheck;
 
 use klvmr::allocator::Allocator;
@@ -46,6 +96,17 @@ use crate::compiler::comptypes::{
 use crate::compiler::optimize::Optimization;
 use crate::compiler::sexp::SExp;
 
+#[derive(Clone)]
+pub struct FunctionEntry {
+    pub name: Vec<u8>,
+    pub code: Rc<SExp>,
+}
+
+#[derive(Default)]
+pub struct Funcache {
+    pub function_outputs: HashMap<Vec<u8>, FunctionEntry>,
+}
+
 /// An object which represents the standard set of mutable items passed down the
 /// stack when compiling chiklisp.
 pub struct BasicCompileContext {
@@ -53,6 +114,12 @@ pub struct BasicCompileContext {
     pub runner: Rc<dyn TRunProgram>,
     pub symbols: HashMap<String, String>,
     pub optimizer: Box<dyn Optimization>,
+    /// Given the operative environment and a serialization of the helper, this is the generated
+    /// code from that helper.
+    ///
+    /// Since this is for speeding up optimization-time work, generation of the dependency graph
+    /// must follow desugaring.
+    pub funcache: Option<Funcache>,
 }
 
 impl BasicCompileContext {
@@ -200,6 +267,7 @@ impl BasicCompileContext {
             runner,
             symbols,
             optimizer,
+            funcache: None,
         }
     }
 }

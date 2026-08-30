@@ -18,7 +18,7 @@ use crate::classic::platform::distutils::dep_util::newer;
 
 use crate::compiler::compiler::compile_file;
 use crate::compiler::compiler::DefaultCompilerOpts;
-use crate::compiler::comptypes::{CompileErr, CompilerOpts};
+use crate::compiler::comptypes::{CompileErr, CompilerOpts, CompilerOutput};
 use crate::compiler::dialect::detect_modern;
 use crate::compiler::klvm::convert_to_klvm_rs;
 use crate::compiler::optimize::maybe_finalize_program_via_classic_optimizer;
@@ -115,13 +115,17 @@ pub fn compile_klvm_text_maybe_opt(
             .set_frontend_opt(stepping == 22);
 
         let unopt_res = compile_file(allocator, runner.clone(), opts.clone(), text, symbol_table)?;
-        let res = maybe_finalize_program_via_classic_optimizer(
-            allocator,
-            runner,
-            opts,
-            do_optimize,
-            &unopt_res,
-        )?;
+        let res = if matches!(unopt_res, CompilerOutput::Module(_)) {
+            Rc::new(unopt_res.to_sexp())
+        } else {
+            maybe_finalize_program_via_classic_optimizer(
+                allocator,
+                runner,
+                opts,
+                do_optimize,
+                &unopt_res.to_sexp(),
+            )?
+        };
 
         Ok(convert_to_klvm_rs(allocator, res)?)
     } else {

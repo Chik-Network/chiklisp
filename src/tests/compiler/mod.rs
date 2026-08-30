@@ -6,14 +6,18 @@ use crate::compiler::srcloc::{Srcloc, Until};
 
 mod assign;
 mod cldb;
+mod codegen_funcache;
 mod compiler;
 mod evaluate;
 mod fuzz;
 mod fuzz_assign;
 mod klvm;
+mod module_cache;
+mod modules;
 mod optimizer;
 mod preprocessor;
 mod repl;
+mod resolve;
 mod restargs;
 mod runtypes;
 mod singleton;

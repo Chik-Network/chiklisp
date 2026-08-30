@@ -21,22 +21,22 @@ use chiklisp::classic::klvm::__type_compatibility__::{Bytes, Stream, Unvalidated
 use chiklisp::classic::klvm::serialize::sexp_to_stream;
 use chiklisp::classic::klvm_tools::klvmc::compile_klvm_inner;
 use chiklisp::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
-use chiklisp::compiler::CompileContextWrapper;
 use chiklisp::compiler::cldb::{
     hex_to_modern_sexp, CldbOverrideBespokeCode, CldbRun, CldbRunEnv, CldbRunnable,
     CldbSingleBespokeOverride,
 };
-use chiklisp::compiler::klvm::{convert_to_klvm_rs, start_step};
 use chiklisp::compiler::compiler::{
     extract_program_and_env, path_to_function, rewrite_in_program, DefaultCompilerOpts,
 };
 use chiklisp::compiler::comptypes::{CompileErr, CompilerOpts};
+use chiklisp::compiler::klvm::{convert_to_klvm_rs, start_step};
 use chiklisp::compiler::optimize::get_optimizer;
 use chiklisp::compiler::prims;
 use chiklisp::compiler::repl::Repl;
 use chiklisp::compiler::runtypes::RunFailure;
 use chiklisp::compiler::sexp::SExp;
 use chiklisp::compiler::srcloc::Srcloc;
+use chiklisp::compiler::CompileContextWrapper;
 
 extern crate alloc;
 
@@ -468,14 +468,11 @@ pub fn repl_run_string(repl_id: i32, input: String) -> JsValue {
                     a,
                     repl_container.runner.clone(),
                     &mut symbols,
-                    get_optimizer(&loc, repl_container.opts.clone())?
+                    get_optimizer(&loc, repl_container.opts.clone())?,
                 );
                 r.process_line(&mut wrapper.context, input)
             } else {
-                Err(CompileErr(
-                    loc,
-                    "no such repl".to_string(),
-                ))
+                Err(CompileErr(loc, "no such repl".to_string()))
             }
         })
         .map(|v| v.map(|v| js_object_from_sexp(v.to_sexp()).unwrap_or_else(|e| e)))
