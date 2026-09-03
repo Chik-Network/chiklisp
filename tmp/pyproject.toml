@@ -1,4 +1,4 @@
 [project]
-name = "klvm_tools_rs"
+name = "clvk_tools_rs"
 version = "0.4.1"
 dependencies = ["chiklisp == 0.4.1"]

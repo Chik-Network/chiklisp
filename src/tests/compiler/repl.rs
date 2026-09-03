@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 use crate::compiler::compiler::DefaultCompilerOpts;
 use crate::compiler::comptypes::CompileErr;
 use crate::compiler::optimize::get_optimizer;

@@ -4,11 +4,12 @@ use std::rc::Rc;
 
 use num_bigint::ToBigInt;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
-use crate::classic::klvm::__type_compatibility__::{bi_one, bi_zero};
-use crate::classic::klvm_tools::stages::stage_0::TRunProgram;
+use crate::classic::clvk::__type_compatibility__::{bi_one, bi_zero};
+use crate::classic::clvk_tools::stages::stage_0::TRunProgram;
 
+use crate::compiler::clvk::{run, truthy};
 use crate::compiler::codegen::{codegen, hoist_assign_form};
 use crate::compiler::compiler::is_at_capture;
 use crate::compiler::comptypes::{
@@ -16,7 +17,6 @@ use crate::compiler::comptypes::{
     HelperForm, LambdaData, LetData, LetFormInlineHint, LetFormKind,
 };
 use crate::compiler::frontend::frontend;
-use crate::compiler::klvm::{run, truthy};
 use crate::compiler::optimize::get_optimizer;
 use crate::compiler::runtypes::RunFailure;
 use crate::compiler::sexp::SExp;
@@ -87,7 +87,7 @@ pub enum ArgInputs {
 ///
 /// The emitted expressions are simpler and sometimes smaller, depending on what the
 /// evaulator was able to do.  It performs all obvious substitutions and some
-/// obvious simplifications based on KLVM operations (such as combining
+/// obvious simplifications based on CLVK operations (such as combining
 /// picking operations with conses in some cases).  If the expression can't
 /// be simplified to a constant, any remaining variable references and the
 /// operations on them are left.

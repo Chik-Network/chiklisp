@@ -111,7 +111,7 @@ inject("stage_1")
 
 inject("stage_2")
 
-inject("klvm_runtime")
+inject("clvk_runtime")
 
 inject("cmd")
 

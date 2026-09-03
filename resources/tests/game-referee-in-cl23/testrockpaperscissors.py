@@ -1,14 +1,14 @@
 import hashlib
 
-from klvm_rs import Program
+from clvk_rs import Program
 
-from klvm.EvalError import EvalError
+from clvk.EvalError import EvalError
 
 
-MOD_A = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsa.klvm.hex").read()))
-MOD_B = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsb.klvm.hex").read()))
-MOD_C = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsc.klvm.hex").read()))
-MOD_D = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsd.klvm.hex").read()))
+MOD_A = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsa.clvk.hex").read()))
+MOD_B = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsb.clvk.hex").read()))
+MOD_C = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsc.clvk.hex").read()))
+MOD_D = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsd.clvk.hex").read()))
 
 
 def drun(prog: Program, *args: Program):

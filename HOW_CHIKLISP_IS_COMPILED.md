@@ -22,10 +22,10 @@ is complex and less accessible.  There are definitely overlaps, as a good number
 of people write assembler for smaller CPUs more or less as a high level language
 and a good many compilers treat javascript purely as a VM for executing code on.
 In the case of chiklisp, 'chiklisp' can be thought of a mid-level language in the
-vein of C++ and the target is KLVM, the virtual machine that chik nodes use to
-evaluate puzzles.  KLVM is quite unergonomic to write by hand given the lack
+vein of C++ and the target is CLVK, the virtual machine that chik nodes use to
+evaluate puzzles.  CLVK is quite unergonomic to write by hand given the lack
 of the ability to name things and the need to compute numeric paths through
-KLVM values (more about this later) to do useful work.
+CLVK values (more about this later) to do useful work.
 
 So there's really only a few choices a compiler can make in structural terms:
 
@@ -45,19 +45,19 @@ Structurally, compilers tend to work in passes, even if on only part of the inpu
 In C, where the main abstraction is "functions" in the C sense, each function is
 treated conceptually separately and code is generated for it.  In chiklisp, the
 situation is similar; each toplevel function is value that must exist as a quoted
-KLVM value in the program's invariant environment (the word "invariant" is used
-here because KLVM code generation generally encodes paths into this information
+CLVK value in the program's invariant environment (the word "invariant" is used
+here because CLVK code generation generally encodes paths into this information
 into multiple parts of the code and because of this the representation of this
 information is consistent throughout the program's run).
 
 The classic chiklisp compiler does not actually work in usefully separable passes.
-It produces a KLVM expression including a request to run a special primitive (where
-"primitive" here means an operator installed in the KLVM run time system which is
-implemented in "foreign" (non-KLVM) code) whose function is to produce one step of
-chiklisp compilation and wraps this in a KLVM primitive whose purpose is to perform
+It produces a CLVK expression including a request to run a special primitive (where
+"primitive" here means an operator installed in the CLVK run time system which is
+implemented in "foreign" (non-CLVK) code) whose function is to produce one step of
+chiklisp compilation and wraps this in a CLVK primitive whose purpose is to perform
 optimization and constant folding.  These are installed in stage_2 (more on this
 later).  In classic chiklisp, compilation is actually performed by constant
-folding, as that is what causes a KLVM primitive ("com" here) to be evaluated to
+folding, as that is what causes a CLVK primitive ("com" here) to be evaluated to
 a value when the argument is constant ("constant folding" refers to the compile
 time process of taking expression involving constants and computing their results).
 Because of this arrangement, there is only one "pass" (where "pass" refers to a
@@ -66,7 +66,7 @@ another representation, even when both are internal to the compilation process),
 because the only time when a guarantee is given that the entire S-expression
 ("s-expression" refers to the kinds of values held in lisp and lisp-like languages)
 held during compilation in the classic compiler is expected to be completely 
-transformed into KLVM.
+transformed into CLVK.
 
 The modern compiler does have distinct phases of compilation.
 
@@ -133,7 +133,7 @@ The modern compiler does have distinct phases of compilation.
   space.
   
 - The final pass is code generation proper.  The "left environment" shape is
-  produced ("left environment" here refers to the invariant part of the KLVM
+  produced ("left environment" here refers to the invariant part of the CLVK
   environment which is given to the program when its main expression is run,
   providing a consistent pool of sibling functions and constant data that the
   program is able to draw from).
@@ -142,7 +142,7 @@ The modern compiler does have distinct phases of compilation.
   in this compiler, defined at 33 (presently) of src/compiler/sexp.rs.  In both
   classic and modern compilers, the representation of parsed source code and
   emitted code are both their respective views of s-expressions.  The full
-  power of the modern S-expression isn't required in the emitted KLVM code but
+  power of the modern S-expression isn't required in the emitted CLVK code but
   it's convenient because it carries some useful information from the user's
   perspective; it's Srcloc (defined in src/compiler/srcloc.rs) contains a record
   of what part of the source code it was generated from.  These are collected
@@ -150,7 +150,7 @@ The modern compiler does have distinct phases of compilation.
   information about a program regarding user-understandable names and locations
   that can be associated with landmarks in the generated code).  In the case of
   chiklisp, landmarks are identified by "sha256tree" (where "sha256tree" refers
-  to a standard process by which KLVM values are given a fixed-length hash
+  to a standard process by which CLVK values are given a fixed-length hash
   identifier based on their content that has a nearly 0 possibility of
   generating collisions).  Because of this, the symbols can refer to code by
   sha256tree hash and give names to sites in the generated code.
@@ -160,7 +160,7 @@ _Dive into the code from start to compiler_
 The code here and the chiklisp compiler has a history for its life so far.  It
 started in python, was ported very faithfully to typescript and then the typed
 version in typescript was used as a basis for the rust port.  The rust port
-started after klvm_rs was started, because the wind seemed to be blowing toward
+started after clvk_rs was started, because the wind seemed to be blowing toward
 rust and because changes to the python code didn't seem as relevant.
 
 The newer compiler has a different history; it was started in ocaml as a sketch
@@ -186,8 +186,8 @@ guide to navigating it.
 
 _The "main" program of the chiklisp compiler_
 
-The python code contained a 'cmds.py' in 'klvm\_tools', so the structure of the
-rust code is similar; src/classic/klvm_tools/cmds.rs contains the code for all
+The python code contained a 'cmds.py' in 'clvk\_tools', so the structure of the
+rust code is similar; src/classic/clvk_tools/cmds.rs contains the code for all
 the tools that historically existed; 'run', 'brun', 'opc', 'opd' and in similarly
 named functions.  In particular, "launch\_tool".  This is exactly as in the python
 code.
@@ -200,15 +200,15 @@ useful so that the returned string can inform compilation of the filename it's
 compiling so it can in turn inform the source locations what file name they belong
 to.  A few other things are similar; since classic chiklisp compilation mixes
 code in the compiler's source language with expressions written in chiklisp and
-stores state in the KLVM runtime environment, a runtime environment is prepared
+stores state in the CLVK runtime environment, a runtime environment is prepared
 for it containing the search paths for include files (the classic compiler reads
-include files via an imperative KLVM operator, \_read, installed at the time when
+include files via an imperative CLVK operator, \_read, installed at the time when
 the interpreter is created.  This interpreter was called "stage\_2" in the python
 code so a function, run\_program\_for\_search\_paths was included in
 src/classic/stages/stage\_2/operators.rs for the purpose of creating that.  The
-normal operation of a KLVM environment is usually immutable and this stance is
+normal operation of a CLVK environment is usually immutable and this stance is
 further encouraged by the lack of lifetime variables decorating the callbacks to
-the klvm runner in klvmr.  Because of that, the code downstream uses a C++ like
+the clvk runner in clvkr.  Because of that, the code downstream uses a C++ like
 approach to enriching the runtime environment with mutable state which will be
 talked about later.  The actual call to run\_program\_for\_search\_paths is at
 cmds.rs, line 798 currently.
@@ -251,7 +251,7 @@ moment.
 compile_file in src/compiler/compiler.rs is a simple interface to compilation,
 given a collection of prerequisite objects, it first parses the source text given
 using parse\_sexp in src/compiler/sexp.rs (line 817 currently) to produce SExp,
-the data structure representing chiklisp inputs and KLVM values, then gives the
+the data structure representing chiklisp inputs and CLVK values, then gives the
 resulting list of parsed forms to compile\_pre\_forms (line 170 of
 src/compiler/compiler.rs currently).  compile\_pre\_forms first runs the frontend
 (calling src/compiler/frontend.rs, function frontend at line 747) at line 177 of
@@ -354,7 +354,7 @@ These are the current BodyForm alternatives:
 
 These are built from and often contain elements of SExp, which is also a sum type.
 The sexp type is intended to reflect user intention, but keep the ability to treat
-each value as plain klvm when required.  This places a greater burden on the
+each value as plain clvk when required.  This places a greater burden on the
 implementation when using these as values in a program, but allows all parts of
 compilation (including code generation output) to remain associated with sites
 and atoms in the source text when those associations make sense.  It contains:
@@ -386,7 +386,7 @@ and atoms in the source text when those associations make sense.  It contains:
 
 Its job is to process programs so it doesn't implement compilation the same way
 (by running a program that emits a mod form), but instead is purpose-built to
-read and process a program.  As such it doesn't rely on populating a klvm
+read and process a program.  As such it doesn't rely on populating a clvk
 environment with special operators or on running anything necessarily in the VM,
 although it does that for constant folding and a few other things.
 
@@ -396,7 +396,7 @@ Compilation can be done in a few ways.  There is a
   
 Type which serves as connection between the consumer's settings for the compiler
 and the compilation process.  Its method compile\_file takes a few objects it will
-need in case it must run klvm code: an Allocator (klvmr) and a runner 
+need in case it must run clvk code: an Allocator (clvkr) and a runner 
 (TRunProgram from src/classic/stages/stage_0.rs).
 
 It's used this way in 'run':
@@ -422,9 +422,9 @@ This the the full lifecycle of chiklisp compilation from an outside perspective.
 
 If you want to parse the source file yourself, you can use parse_sexp from 
 src/compiler/sexp, which yields a result of Vec&lt;Rc&lt;SExp&gt;&gt;, a vector
-of refcounted pointers to s-expression objects.  These values are richer than klvm
+of refcounted pointers to s-expression objects.  These values are richer than clvk
 values in that atoms, strings, hex values, integers and nils are distinguishable.
-This is similar to the code in src/classic/klvm/type.rs but
+This is similar to the code in src/classic/clvk/type.rs but
 since these value distinctions are first-class in SExp, all values processed
 by the compiler, starting with the preprocessor (src/compiler/preprocessor.rs), 
 going through the frontend (src/compile/frontend.rs) and to code generation
@@ -570,9 +570,9 @@ lookup invocations and recognizes a few types:
       (@ n), where n is a constant integer only.  This desugars to a single 
       environment lookup in the generated code.
 
-macro expansions require transformation of the user's code into klvm values and
-back because the macro program is run as a klvm program (when this was written,
-src/compiler/klvm wasn't fully mature and I hadn't written the evaluator yet).
+macro expansions require transformation of the user's code into clvk values and
+back because the macro program is run as a clvk program (when this was written,
+src/compiler/clvk wasn't fully mature and I hadn't written the evaluator yet).
 A table of user supplied trees by treehash is made (src/compiler/debug.rs, 
 build\_swap\_table\_mut), and the macro output is "rehydrated" by greedily
 replacing each matching subtree with the one taken from the pre-expansion macro
@@ -587,19 +587,19 @@ generate the code for its main expression and then finalize\_env is called to
 match each identifier stored in the left environment with a form for which it
 has generated code recorded and build the env tree.
 
-How KLVM code carries out programs
+How CLVK code carries out programs
 --
 
-_The basics of KLVM from a compilation perspective_
+_The basics of CLVK from a compilation perspective_
 
-One can think of KLVM as a calculator with 1 tricky operator, which is called 'a'
-(apply).  The calculator's state can be thought of as a KLVM value like this:
+One can think of CLVK as a calculator with 1 tricky operator, which is called 'a'
+(apply).  The calculator's state can be thought of as a CLVK value like this:
 
   ((+ 2 5) . (99 101))
   
-You can imagine the KLVM machine doing this on each evaluation step:
+You can imagine the CLVK machine doing this on each evaluation step:
 
-    Find the rightmost index (described well here: [https://github.com/Chik-Network/chiklisp/blob/a660ce7ce07064a6a81bb361f169f6de195cba10/src/classic/klvm_tools/node_path.rs#L1](klvm paths) ) in the left part of the state that is not in the form of a quoted value
+    Find the rightmost index (described well here: [https://github.com/Chik-Network/chiklisp/blob/a660ce7ce07064a6a81bb361f169f6de195cba10/src/classic/clvk_tools/node_path.rs#L1](clvk paths) ) in the left part of the state that is not in the form of a quoted value
     (q . <something>) and:
    
      - if it's a number, enquote the correspondingly indexed value from
@@ -614,7 +614,7 @@ You can imagine the KLVM machine doing this on each evaluation step:
       ((+ 2 (q . 101)) . (99 . 101)) -> ((+ (q . 99) (q . 101)) . (99 101))
       ((+ (q . 99) (q . 101)) . (99 . 101)) -> 200
       
-    Of course, KLVM evaluators try to be more efficient than searching subtrees
+    Of course, CLVK evaluators try to be more efficient than searching subtrees
     like this but at a theoretical level that's all one needs.
     
     The 'a' operator is actually not very exceptional in this, but you can think
@@ -650,8 +650,8 @@ You can imagine the KLVM machine doing this on each evaluation step:
 
 Thinking conceptually like this, we can construct any program we want by computing
 a suitable environment (right side) and suitable code (left side), and letting
-KLVM evaluate them until its done.  There are pragmatic things to think about in
-how KLVM is evaluated:
+CLVK evaluate them until its done.  There are pragmatic things to think about in
+how CLVK is evaluated:
 
  - If we have a program with functions that know about each other, their code has
    to be available to the program as quoted expressions to give to some 'a'
@@ -666,10 +666,10 @@ how KLVM is evaluated:
 If one thinks of everything in these terms, then it isn't too difficult to generate
 code from chiklisp.
 
-_The basic units of KLVM execution are env lookup and function application_
+_The basic units of CLVK execution are env lookup and function application_
 
-Because there is no memory other than the environment in KLVM, a basic building
-block of KLVM code is an environment lookup.  If you consider the arguments to
+Because there is no memory other than the environment in CLVK, a basic building
+block of CLVK code is an environment lookup.  If you consider the arguments to
 a function to be some kind of mirror of the program's current environment:
 
     (defun F (X Y Z) (+ X Y Z))
@@ -778,13 +778,13 @@ or paths to values we have as arguments if arguments in standard positions are
 destructured, worst case we have to cons values together as though the environment
 was being built for an apply.
     
-_KLVM Heap representation isn't dissimiar to other eager functional languages_
+_CLVK Heap representation isn't dissimiar to other eager functional languages_
 
-How KLVM compares to other functional languages in structure is a topic that is
+How CLVK compares to other functional languages in structure is a topic that is
 talked about occasionally, and many of its decisions are fairly alike what's out
 there:
 
-    In KLVM, there are conses and atoms.  Atoms act as numbers and
+    In CLVK, there are conses and atoms.  Atoms act as numbers and
     strings and conses act as boxes of size 2.
     
     (7 8 . 9) =

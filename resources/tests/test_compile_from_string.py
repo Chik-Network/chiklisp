@@ -55,7 +55,7 @@ assert compiled_code["output"] == expected_cl23
 test_path = Path(__file__).parent
 
 output_file = "simple_deinline_case_23.hex"
-compiled_code = chiklisp.compile_klvm(
+compiled_code = chiklisp.compile_clvk(
     str(test_path / "simple_deinline_case_23.clsp"),
     output_file,
     ["."],

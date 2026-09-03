@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use klvmr::Allocator;
+use clvkr::Allocator;
 
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
+use crate::compiler::clvk::run;
 use crate::compiler::codegen::codegen;
 use crate::compiler::compiler::{do_desugar, DefaultCompilerOpts};
 use crate::compiler::comptypes::{
     BodyForm, CompileErr, CompileForm, CompilerOpts, DefunData, HelperForm, LetFormKind,
 };
 use crate::compiler::frontend::frontend;
-use crate::compiler::klvm::run;
 use crate::compiler::optimize::get_optimizer;
 use crate::compiler::resolve::resolve_namespaces;
 use crate::compiler::sexp::{decode_string, parse_sexp, SExp};

@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::str::FromStr;
 
-use chiklisp::classic::klvm::__type_compatibility__::{bi_zero, Bytes, BytesFromType};
+use chiklisp::classic::clvk::__type_compatibility__::{bi_zero, Bytes, BytesFromType};
 use chiklisp::compiler::sexp::SExp;
 use chiklisp::compiler::srcloc::{Srcloc, Until};
 use chiklisp::util::Number;

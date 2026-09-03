@@ -1,8 +1,8 @@
 import io
 import unittest
 
-from klvm import to_sexp_f
-from klvm.serialize import sexp_from_stream
+from clvk import to_sexp_f
+from clvk.serialize import sexp_from_stream
 
 
 TEXT = b"the quick brown fox jumps over the lazy dogs"

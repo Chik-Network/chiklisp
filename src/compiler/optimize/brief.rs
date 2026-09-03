@@ -2,8 +2,8 @@ use num_bigint::ToBigInt;
 use std::borrow::Borrow;
 use std::rc::Rc;
 
-use crate::classic::klvm::__type_compatibility__::bi_one;
-use crate::classic::klvm_tools::node_path::compose_paths;
+use crate::classic::clvk::__type_compatibility__::bi_one;
+use crate::classic::clvk_tools::node_path::compose_paths;
 
 #[cfg(test)]
 use crate::compiler::sexp::parse_sexp;

@@ -1,5 +1,5 @@
-from klvm_tools.binutils import assemble
-from klvm_tools.pattern_match import match
+from clvk_tools.binutils import assemble
+from clvk_tools.pattern_match import match
 
 
 def test_pattern_match():

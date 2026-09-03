@@ -4,20 +4,20 @@ use std::collections::HashMap;
 use std::fs;
 use std::rc::Rc;
 
-use klvmr::Allocator;
+use clvkr::Allocator;
 
-use crate::classic::klvm::__type_compatibility__::{Bytes, Stream, UnvalidatedBytesFromType};
-use crate::classic::klvm::serialize::{sexp_from_stream, SimpleCreateKLVMObject};
-use crate::classic::klvm_tools::binutils::{assemble, disassemble};
-use crate::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use crate::classic::clvk::__type_compatibility__::{Bytes, Stream, UnvalidatedBytesFromType};
+use crate::classic::clvk::serialize::{sexp_from_stream, SimpleCreateCLVKObject};
+use crate::classic::clvk_tools::binutils::{assemble, disassemble};
+use crate::classic::clvk_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
 
+use crate::compiler::clvk::convert_to_clvk_rs;
 use crate::compiler::compiler::{compile_file, DefaultCompilerOpts};
 use crate::compiler::comptypes::{
     CompileErr, CompilerOpts, CompilerOutput, HasCompilerOptsDelegation,
 };
 use crate::compiler::dialect::detect_modern;
 use crate::compiler::frontend::frontend;
-use crate::compiler::klvm::convert_to_klvm_rs;
 use crate::compiler::sexp::{decode_string, enlist, parse_sexp, SExp};
 use crate::compiler::srcloc::Srcloc;
 
@@ -107,7 +107,7 @@ pub fn perform_compile_of_file(
     let loc = Srcloc::start(filename);
     let parsed: Vec<Rc<SExp>> = parse_sexp(loc.clone(), content.bytes()).expect("should parse");
     let listed = Rc::new(enlist(loc.clone(), &parsed));
-    let nodeptr = convert_to_klvm_rs(allocator, listed.clone()).expect("should convert");
+    let nodeptr = convert_to_clvk_rs(allocator, listed.clone()).expect("should convert");
     let dialect = detect_modern(allocator, nodeptr);
     let opts: Rc<dyn CompilerOpts> = Rc::new(source_opts.clone()).set_dialect(dialect);
     let mut symbol_table = HashMap::new();
@@ -118,7 +118,7 @@ pub fn perform_compile_of_file(
     })
 }
 
-pub fn hex_to_klvm(allocator: &mut Allocator, hex_data: &[u8]) -> klvmr::allocator::NodePtr {
+pub fn hex_to_clvk(allocator: &mut Allocator, hex_data: &[u8]) -> clvkr::allocator::NodePtr {
     let mut hex_stream = Stream::new(Some(
         Bytes::new_validated(Some(UnvalidatedBytesFromType::Hex(decode_string(
             &hex_data,
@@ -128,7 +128,7 @@ pub fn hex_to_klvm(allocator: &mut Allocator, hex_data: &[u8]) -> klvmr::allocat
     sexp_from_stream(
         allocator,
         &mut hex_stream,
-        Box::new(SimpleCreateKLVMObject {}),
+        Box::new(SimpleCreateCLVKObject {}),
     )
     .expect("hex data should decode as sexp")
     .1
@@ -165,7 +165,7 @@ fn test_compile_and_run_program_with_modules_and_fs(
                 "should have written hex data {} beside the source file",
                 run.hexfile
             ));
-        let compiled_node = hex_to_klvm(&mut allocator, &hex_data);
+        let compiled_node = hex_to_clvk(&mut allocator, &hex_data);
 
         if matches!(&run.outcome, ContentEquals) {
             let disassembled = disassemble(&allocator, compiled_node, None);

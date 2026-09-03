@@ -1,16 +1,16 @@
 use std::rc::Rc;
 
-use klvmr::Allocator;
+use clvkr::Allocator;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
 
 use crate::tests::classic::run::{do_basic_brun, do_basic_run};
 
-use crate::classic::klvm::sexp::atom;
-use crate::classic::klvm_tools::binutils::{assemble_from_ir, disassemble};
-use crate::classic::klvm_tools::ir::r#type::NEW_BIT_CONSTANTS;
-use crate::classic::klvm_tools::ir::reader::read_ir;
-use crate::classic::klvm_tools::ir::writer::write_ir;
+use crate::classic::clvk::sexp::atom;
+use crate::classic::clvk_tools::binutils::{assemble_from_ir, disassemble};
+use crate::classic::clvk_tools::ir::r#type::NEW_BIT_CONSTANTS;
+use crate::classic::clvk_tools::ir::reader::read_ir;
+use crate::classic::clvk_tools::ir::writer::write_ir;
 
 #[test]
 fn test_binary_numeric_constant_classic_0() {

@@ -214,7 +214,7 @@ impl ComplexAssignExpression {
                     srcloc.clone(),
                     &[Rc::new(random_op.to_sexp(&srcloc)), left.sexp, right.sexp],
                 )),
-                definition: Rc::new(ValueSpecification::KlvmBinop(
+                definition: Rc::new(ValueSpecification::ClvkBinop(
                     random_op,
                     left.definition,
                     right.definition,
@@ -356,15 +356,15 @@ fn test_complex_assign_expression() {
     assert_eq!(g3.sexp.to_string(), "(18 (16 122 (17 a1 43)) -53)");
     assert_eq!(
         g3.definition,
-        Rc::new(ValueSpecification::KlvmBinop(
+        Rc::new(ValueSpecification::ClvkBinop(
             SupportedOperators::Times,
-            Rc::new(ValueSpecification::KlvmBinop(
+            Rc::new(ValueSpecification::ClvkBinop(
                 SupportedOperators::Plus,
                 Rc::new(ValueSpecification::ConstantValue(Rc::new(SExp::Integer(
                     srcloc.clone(),
                     122.to_bigint().unwrap()
                 )))),
-                Rc::new(ValueSpecification::KlvmBinop(
+                Rc::new(ValueSpecification::ClvkBinop(
                     SupportedOperators::Minus,
                     Rc::new(ValueSpecification::VarRef(b"a1".to_vec())),
                     Rc::new(ValueSpecification::ConstantValue(Rc::new(SExp::Integer(
@@ -386,16 +386,16 @@ fn test_complex_assign_expression() {
     );
     assert_eq!(
         g1.definition,
-        Rc::new(ValueSpecification::KlvmBinop(
+        Rc::new(ValueSpecification::ClvkBinop(
             SupportedOperators::Plus,
             Rc::new(ValueSpecification::VarRef(b"v4".to_vec())),
-            Rc::new(ValueSpecification::KlvmBinop(
+            Rc::new(ValueSpecification::ClvkBinop(
                 SupportedOperators::Plus,
-                Rc::new(ValueSpecification::KlvmBinop(
+                Rc::new(ValueSpecification::ClvkBinop(
                     SupportedOperators::Minus,
-                    Rc::new(ValueSpecification::KlvmBinop(
+                    Rc::new(ValueSpecification::ClvkBinop(
                         SupportedOperators::Minus,
-                        Rc::new(ValueSpecification::KlvmBinop(
+                        Rc::new(ValueSpecification::ClvkBinop(
                             SupportedOperators::Plus,
                             Rc::new(ValueSpecification::VarRef(b"v4".to_vec())),
                             Rc::new(ValueSpecification::VarRef(b"v4".to_vec()))

@@ -7,7 +7,7 @@ use std::borrow::Borrow;
 use std::ffi::CString;
 use std::rc::Rc;
 
-use crate::classic::klvm::__type_compatibility__::bi_zero;
+use crate::classic::clvk::__type_compatibility__::bi_zero;
 use crate::compiler::runtypes::RunFailure;
 use crate::compiler::sexp::SExp;
 use crate::compiler::srcloc::Srcloc;
@@ -16,7 +16,7 @@ pub fn map_err_to_pyerr<PA>(srcloc: Srcloc, r: PyResult<PA>) -> Result<PA, RunFa
     r.map_err(|e| RunFailure::RunErr(srcloc, format!("{e}")))
 }
 
-pub fn python_value_to_klvm(val: Bound<'_, PyAny>) -> Result<Rc<SExp>, RunFailure> {
+pub fn python_value_to_clvk(val: Bound<'_, PyAny>) -> Result<Rc<SExp>, RunFailure> {
     let srcloc = Srcloc::start("*python*");
     val.cast::<PyList>()
         .ok()
@@ -30,7 +30,7 @@ pub fn python_value_to_klvm(val: Bound<'_, PyAny>) -> Result<Rc<SExp>, RunFailur
                     let any_of_elt = map_err_to_pyerr(srcloc.clone(), l.get_item(i))?;
                     result = SExp::Cons(
                         srcloc.clone(),
-                        python_value_to_klvm(any_of_elt)?,
+                        python_value_to_clvk(any_of_elt)?,
                         Rc::new(result),
                     );
                 }
@@ -51,8 +51,8 @@ pub fn python_value_to_klvm(val: Bound<'_, PyAny>) -> Result<Rc<SExp>, RunFailur
                         let any_of_e1 = map_err_to_pyerr(srcloc.clone(), t.get_item(1))?;
                         Ok(Rc::new(SExp::Cons(
                             srcloc.clone(),
-                            python_value_to_klvm(any_of_e0)?,
-                            python_value_to_klvm(any_of_e1)?,
+                            python_value_to_clvk(any_of_e0)?,
+                            python_value_to_clvk(any_of_e1)?,
                         )))
                     }
                 })
@@ -81,17 +81,17 @@ pub fn python_value_to_klvm(val: Bound<'_, PyAny>) -> Result<Rc<SExp>, RunFailur
         .unwrap_or_else(|| {
             Err(RunFailure::RunErr(
                 srcloc.clone(),
-                "no way to convert python value to klvm".to_string(),
+                "no way to convert python value to clvk".to_string(),
             ))
         })
 }
 
-pub fn klvm_value_to_python(py: Python, val: Rc<SExp>) -> PyResult<Py<PyAny>> {
+pub fn clvk_value_to_python(py: Python, val: Rc<SExp>) -> PyResult<Py<PyAny>> {
     val.proper_list()
         .map(|lst| {
             let mut vallist = Vec::new();
             for i in lst {
-                vallist.push(klvm_value_to_python(py, Rc::new(i.clone()))?);
+                vallist.push(clvk_value_to_python(py, Rc::new(i.clone()))?);
             }
             PyList::new(py, &vallist)?.into_py_any(py)
         })
@@ -99,8 +99,8 @@ pub fn klvm_value_to_python(py: Python, val: Rc<SExp>) -> PyResult<Py<PyAny>> {
             SExp::Cons(_, a, b) => PyTuple::new(
                 py,
                 vec![
-                    klvm_value_to_python(py, a.clone())?,
-                    klvm_value_to_python(py, b.clone())?,
+                    clvk_value_to_python(py, a.clone())?,
+                    clvk_value_to_python(py, b.clone())?,
                 ],
             )?
             .into_py_any(py),

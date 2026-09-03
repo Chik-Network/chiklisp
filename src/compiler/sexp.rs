@@ -16,11 +16,11 @@ use num_traits::{zero, Num};
 use serde::Serialize;
 
 #[cfg(test)]
-use crate::classic::klvm::__type_compatibility__::bi_one;
-use crate::classic::klvm::__type_compatibility__::{bi_zero, Bytes, BytesFromType};
-use crate::classic::klvm::casts::{bigint_from_bytes, bigint_to_bytes_klvm, TConvertOption};
-use crate::classic::klvm_tools::ir::r#type::NEW_BIT_CONSTANTS;
-use crate::classic::klvm_tools::ir::reader::bitwise_constant;
+use crate::classic::clvk::__type_compatibility__::bi_one;
+use crate::classic::clvk::__type_compatibility__::{bi_zero, Bytes, BytesFromType};
+use crate::classic::clvk::casts::{bigint_from_bytes, bigint_to_bytes_clvk, TConvertOption};
+use crate::classic::clvk_tools::ir::r#type::NEW_BIT_CONSTANTS;
+use crate::classic::clvk_tools::ir::reader::bitwise_constant;
 #[cfg(any(test, feature = "fuzz"))]
 use crate::compiler::fuzz::{ExprModifier, FuzzChoice};
 use crate::compiler::prims::prims;
@@ -501,7 +501,7 @@ impl SExp {
                 b.encode_mut(v);
             }
             SExp::Integer(_, i) => {
-                let mut bi_bytes = bigint_to_bytes_klvm(i).data().to_vec();
+                let mut bi_bytes = bigint_to_bytes_clvk(i).data().to_vec();
 
                 v.append(&mut bi_bytes);
             }
@@ -1153,7 +1153,7 @@ fn test_tricky_parser_tail_03() {
 // The type of the result is an ad-hoc shape derived from the shape of the
 // original request.
 //
-// This mirrors code in src/classic/klvm/sexp.rs
+// This mirrors code in src/classic/clvk/sexp.rs
 //
 // It's a nicer way of modelling matches that will overtake bespoke code for a lot
 // of things.

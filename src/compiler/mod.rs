@@ -1,21 +1,21 @@
 //! Chiklisp compiler and some associated tools, such as a more informative debugger.
 //!
-//! klvm -- a klvm runner which allows klvm to be executed one step at a time, returning control
+//! clvk -- a clvk runner which allows clvk to be executed one step at a time, returning control
 //! to the caller.
 //!
-//! cldb -- cldb debugging using the klvm step runner.  it produces source coordinates for the
+//! cldb -- cldb debugging using the clvk step runner.  it produces source coordinates for the
 //!
-//! klvm code being executed at each step.
+//! clvk code being executed at each step.
 //!
 //! comptypes -- datastructure for representing and manipulating chiklisp programs.
 //!
-//! debug -- support for partly recovering debug information after passing klvm data through
+//! debug -- support for partly recovering debug information after passing clvk data through
 //! a less expressive data representation.
 //!
 //! evaluate -- an evaluator for the chiklisp language itself which can also partially evaluate
 //! chiklisp expressions.
 //!
-//! frontend -- process parsed klvm sexp into a representation of a chiklisp program.
+//! frontend -- process parsed clvk sexp into a representation of a chiklisp program.
 //!
 //! gensym -- simple unique name generator.
 //!
@@ -28,6 +28,8 @@
 /// Chiklisp debugging.
 pub mod cldb;
 pub mod cldb_hierarchy;
+/// CLVK running.
+pub mod clvk;
 pub mod codegen;
 /// CompilerOpts which is the main holder of toplevel compiler state.
 #[allow(clippy::module_inception)]
@@ -43,9 +45,9 @@ pub mod debug;
 pub mod dialect;
 /// Evaluate and partially evaluate chiklisp expressions
 pub mod evaluate;
-/// Turn chiklisp programs expressed as parsed klvm into data structures describing a chiklisp program.
+/// Turn chiklisp programs expressed as parsed clvk into data structures describing a chiklisp program.
 pub mod frontend;
-/// A generator which can expand klvm expressions randomly according to rules, allowing random
+/// A generator which can expand clvk expressions randomly according to rules, allowing random
 /// programs and data structures to be generated.
 #[cfg(any(test, feature = "fuzz"))]
 pub mod fuzz;
@@ -53,8 +55,6 @@ pub mod fuzz;
 pub mod gensym;
 /// Support for inline functions.
 mod inline;
-/// KLVM running.
-pub mod klvm;
 /// Support for lambda functions with captures.
 mod lambda;
 /// Support for optimizing chiklisp.
@@ -71,23 +71,23 @@ pub mod repl;
 /// style compileforms from ones that use namespaces.  Helpers are retrieved from accessible
 /// namespaces and all references are rewritten to be fully qualified.
 pub mod resolve;
-/// Types related to running klvm code.
+/// Types related to running clvk code.
 pub mod runtypes;
 /// A flexible, full featured SExp object which preserves a source association and user intent.
 pub mod sexp;
-/// Support for preserving the association between klvm data and locations in the source code.
+/// Support for preserving the association between clvk data and locations in the source code.
 pub mod srcloc;
 /// Support for limiting stack depth during evaluation.
 pub mod stackvisit;
 /// Support for determining whether program argument values will be used statically.
 pub mod usecheck;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 use std::collections::HashMap;
 use std::mem::swap;
 use std::rc::Rc;
 
-use crate::classic::klvm_tools::stages::stage_0::TRunProgram;
+use crate::classic::clvk_tools::stages::stage_0::TRunProgram;
 use crate::compiler::comptypes::{
     BodyForm, CompileErr, CompileForm, CompilerOpts, DefunData, HelperForm, PrimaryCodegen,
 };
@@ -105,14 +105,14 @@ pub struct BasicCompileContext {
 
 impl BasicCompileContext {
     /// Get a mutable allocator reference from this compile context. The
-    /// allocator is used any time we need to execute pure KLVM operators, such
+    /// allocator is used any time we need to execute pure CLVK operators, such
     /// as when evaluating macros or constant folding any chiklisp expression.
     fn allocator(&mut self) -> &mut Allocator {
         &mut self.allocator
     }
 
     /// Get the runner this compile context carries. This is used with the
-    /// allocator above to execute pure KLVM when needed either on behalf of a
+    /// allocator above to execute pure CLVK when needed either on behalf of a
     /// macro or constant folding.
     fn runner(&self) -> Rc<dyn TRunProgram> {
         self.runner.clone()
@@ -120,7 +120,7 @@ impl BasicCompileContext {
 
     /// Get the mutable symbol store this compile context carries. During
     /// compilation, the compiler records the relationships between objects in
-    /// the source code and emitted KLVM expressions, along with other useful
+    /// the source code and emitted CLVK expressions, along with other useful
     /// information.
     ///
     /// There are times when we're in a subcompile (such as mod expressions when
@@ -260,7 +260,7 @@ enum ContextHolder<'a> {
 /// A wrapper that owns a BasicCompileContext and remembers a mutable reference
 /// to an allocator and symbols.  It is used as a container to swap out these
 /// objects for new ones used in an inner compile context.  This is used when
-/// a subcompile occurs such as when a macro is compiled to KLVM to be executed
+/// a subcompile occurs such as when a macro is compiled to CLVK to be executed
 /// or an inner mod is compiled.
 pub struct CompileContextWrapper<'a> {
     pub symbols: &'a mut HashMap<String, String>,

@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
-use crate::classic::klvm::__type_compatibility__::{Bytes, BytesFromType, Stream};
-use crate::classic::klvm::serialize::{sexp_from_stream, SimpleCreateKLVMObject};
-use klvm_rs::allocator::{Allocator, NodePtr, SExp};
+use crate::classic::clvk::__type_compatibility__::{Bytes, BytesFromType, Stream};
+use crate::classic::clvk::serialize::{sexp_from_stream, SimpleCreateCLVKObject};
+use clvk_rs::allocator::{Allocator, NodePtr, SExp};
 
 use pyo3::exceptions::PyException;
 use pyo3::types::{PyBytes, PyTuple};
 use pyo3::{create_exception, prelude::*, IntoPyObjectExt};
 
-use crate::classic::klvm_tools::binutils;
+use crate::classic::clvk_tools::binutils;
 
 create_exception!(mymodule, ConvError, PyException);
 
@@ -95,7 +95,7 @@ pub fn disassemble_generic(program_bytes: Bound<'_, PyBytes>) -> PyResult<String
     let sexp = sexp_from_stream(
         &mut allocator,
         &mut stream,
-        Box::new(SimpleCreateKLVMObject {}),
+        Box::new(SimpleCreateCLVKObject {}),
     )
     .map_err(|e| ConvError::new_err(e.to_string()))?;
 

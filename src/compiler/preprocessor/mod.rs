@@ -4,15 +4,19 @@ use std::borrow::Borrow;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
-use klvm_rs::error::EvalErr;
-use klvmr::allocator::Allocator;
-use klvmr::NodePtr;
+use clvk_rs::error::EvalErr;
+use clvkr::allocator::Allocator;
+use clvkr::NodePtr;
 
-use crate::classic::klvm_tools::binutils::assemble;
-use crate::classic::klvm_tools::klvmc::compile_klvm_text_maybe_opt;
-use crate::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use crate::classic::clvk_tools::binutils::assemble;
+use crate::classic::clvk_tools::clvkc::compile_clvk_text_maybe_opt;
+use crate::classic::clvk_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
 
 use crate::compiler::cldb::hex_to_modern_sexp;
+use crate::compiler::clvk;
+use crate::compiler::clvk::{
+    convert_from_clvk_rs, sha256tree, sha256tree_from_atom, truthy, NewStyleIntConversion,
+};
 use crate::compiler::compiler::{compile_from_compileform, compile_pre_forms};
 use crate::compiler::comptypes::{
     BodyForm, CompileErr, CompileForm, CompilerOpts, CompilerOutput, ConstantKind, DefconstData,
@@ -21,10 +25,6 @@ use crate::compiler::comptypes::{
 };
 use crate::compiler::dialect::{detect_modern, AcceptedDialect, KNOWN_DIALECTS};
 use crate::compiler::frontend::{compile_helperform, compile_namespace, compile_nsref, frontend};
-use crate::compiler::klvm;
-use crate::compiler::klvm::{
-    convert_from_klvm_rs, sha256tree, sha256tree_from_atom, truthy, NewStyleIntConversion,
-};
 use crate::compiler::optimize::get_optimizer;
 use crate::compiler::preprocessor::macros::PreprocessorExtension;
 use crate::compiler::rename::rename_args_helperform;
@@ -518,7 +518,7 @@ impl Preprocessor {
 
             if dialect.stepping.is_none() {
                 // Classic compile.
-                let newly_compiled = compile_klvm_text_maybe_opt(
+                let newly_compiled = compile_clvk_text_maybe_opt(
                     &mut allocator,
                     self.subcompile_opts.optimize(),
                     self.subcompile_opts.clone(),
@@ -529,7 +529,7 @@ impl Preprocessor {
                 )
                 .map_err(|e| CompileErr(srcloc.clone(), format!("Subcompile failed: {:?}", e)))?;
                 let converted =
-                    convert_from_klvm_rs(&mut allocator, srcloc.clone(), newly_compiled)?;
+                    convert_from_clvk_rs(&mut allocator, srcloc.clone(), newly_compiled)?;
                 let converted_borrowed: &SExp = converted.borrow();
                 return Ok(vec![
                     make_constant(b"program", converted_borrowed.clone()),
@@ -726,11 +726,11 @@ impl Preprocessor {
         let run_to_compile_err = |e| match e {
             RunFailure::RunExn(l, x) => CompileErr(
                 l,
-                format!("failed to convert compiled klvm to expression: throw ({x})"),
+                format!("failed to convert compiled clvk to expression: throw ({x})"),
             ),
             RunFailure::RunErr(l, e) => CompileErr(
                 l,
-                format!("failed to convert compiled klvm to expression: {e}"),
+                format!("failed to convert compiled clvk to expression: {e}"),
             ),
         };
 
@@ -755,7 +755,7 @@ impl Preprocessor {
         } else if let IncludeProcessType::Compiled = &kind {
             let decoded_content = decode_string(&content);
             let mut symtab = HashMap::new();
-            let newly_compiled = compile_klvm_text_maybe_opt(
+            let newly_compiled = compile_clvk_text_maybe_opt(
                 &mut allocator,
                 self.subcompile_opts.optimize(),
                 self.subcompile_opts.clone(),
@@ -766,7 +766,7 @@ impl Preprocessor {
             )
             .map_err(|e| CompileErr(loc.clone(), format!("Subcompile failed: {:?}", e)))?;
 
-            convert_from_klvm_rs(&mut allocator, loc.clone(), newly_compiled)
+            convert_from_clvk_rs(&mut allocator, loc.clone(), newly_compiled)
                 .map_err(run_to_compile_err)?
         } else {
             // IncludeProcessType::SExpression
@@ -1004,7 +1004,7 @@ impl Preprocessor {
                     let mut allocator = Allocator::new();
 
                     let ppext: &PreprocessorExtension = self.ppext.borrow();
-                    let res = klvm::run(
+                    let res = clvk::run(
                         &mut allocator,
                         self.runner.clone(),
                         self.opts.prim_map(),

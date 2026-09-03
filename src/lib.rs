@@ -1,9 +1,9 @@
-//! Chiklisp compiler and other klvm tools.
+//! Chiklisp compiler and other clvk tools.
 //!
 //! ./src/classic -- overall port of python tools.
-//! ./src/classic/klvm_tools/stages/stage_2 -- port of original klvm compiler.
+//! ./src/classic/clvk_tools/stages/stage_2 -- port of original clvk compiler.
 //!
-//! An approach to klvm compilation which introduces line numbers, strict use of atoms,
+//! An approach to clvk compilation which introduces line numbers, strict use of atoms,
 //! macros which can tell the difference between identifiers and quoted values, better error
 //! reporting and other features.
 //!
@@ -22,7 +22,7 @@ extern crate pyo3;
 
 extern crate tempfile;
 
-extern crate klvmr as klvm_rs;
+extern crate clvkr as clvk_rs;
 
 pub mod util;
 

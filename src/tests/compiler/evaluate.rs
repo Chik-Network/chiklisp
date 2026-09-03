@@ -1,19 +1,19 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
 use crate::compiler::compiler::compile_file;
 use crate::compiler::compiler::DefaultCompilerOpts;
 use crate::compiler::comptypes::{CompileErr, CompilerOpts};
 use crate::compiler::evaluate::{Evaluator, EVAL_STACK_LIMIT};
-use crate::compiler::frontend::{from_klvm, frontend};
+use crate::compiler::frontend::{from_clvk, frontend};
 use crate::compiler::optimize::get_optimizer;
 use crate::compiler::sexp::{parse_sexp, SExp};
 use crate::compiler::srcloc::Srcloc;
 use crate::compiler::BasicCompileContext;
 
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 use crate::util::ErrInto;
 
 use crate::tests::compiler::compiler::squash_name_differences;
@@ -83,16 +83,16 @@ fn test_basic_expand_macro_3() {
     );
 }
 
-fn convert_klvm_to_chiklisp(s: String) -> Result<Rc<SExp>, CompileErr> {
+fn convert_clvk_to_chiklisp(s: String) -> Result<Rc<SExp>, CompileErr> {
     let loc = Srcloc::start(&"*program*".to_string());
     parse_sexp(loc.clone(), s.bytes())
         .err_into()
-        .map(|parsed_program| from_klvm(parsed_program[0].clone()))
+        .map(|parsed_program| from_clvk(parsed_program[0].clone()))
 }
 
 #[test]
-fn test_simple_conversion_from_klvm_to_chiklisp() {
-    let converted = convert_klvm_to_chiklisp("(+ (q . 3) 2)".to_string()).unwrap();
+fn test_simple_conversion_from_clvk_to_chiklisp() {
+    let converted = convert_clvk_to_chiklisp("(+ (q . 3) 2)".to_string()).unwrap();
     assert_eq!(converted.to_string(), "(+ (q . 3) (@ 2))");
 }
 

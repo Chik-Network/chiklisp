@@ -6,27 +6,27 @@ use std::io;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use klvm_rs::allocator::{Allocator, NodePtr, SExp};
-use klvm_rs::error::EvalErr;
+use clvk_rs::allocator::{Allocator, NodePtr, SExp};
+use clvk_rs::error::EvalErr;
 
-use crate::classic::klvm::__type_compatibility__::{
+use crate::classic::clvk::__type_compatibility__::{
     pybytes_repr, t, Bytes, Stream, UnvalidatedBytesFromType,
 };
-use crate::classic::klvm::serialize::{sexp_from_stream, SimpleCreateKLVMObject};
-use crate::classic::klvm::sexp::{sexp_as_bin, First, NodeSel, Rest, SelectNode, ThisNode};
-use crate::classic::klvm::syntax_error::SyntaxErr;
-use crate::classic::klvm_tools::binutils;
-use crate::classic::klvm_tools::cmds::{launch_tool, OpcConversion, OpdConversion, TConversion};
+use crate::classic::clvk::serialize::{sexp_from_stream, SimpleCreateCLVKObject};
+use crate::classic::clvk::sexp::{sexp_as_bin, First, NodeSel, Rest, SelectNode, ThisNode};
+use crate::classic::clvk::syntax_error::SyntaxErr;
+use crate::classic::clvk_tools::binutils;
+use crate::classic::clvk_tools::cmds::{launch_tool, OpcConversion, OpdConversion, TConversion};
 
-use crate::classic::klvm_tools::binutils::{assemble, assemble_from_ir, disassemble};
-use crate::classic::klvm_tools::ir::r#type::IRRepr;
-use crate::classic::klvm_tools::ir::reader::read_ir;
-use crate::classic::klvm_tools::node_path::NodePath;
-use crate::classic::klvm_tools::pattern_match::match_sexp;
-use crate::classic::klvm_tools::stages;
-use crate::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
-use crate::classic::klvm_tools::stages::stage_2::operators::run_program_for_search_paths;
-use crate::classic::klvm_tools::stages::stage_2::optimize::sub_args;
+use crate::classic::clvk_tools::binutils::{assemble, assemble_from_ir, disassemble};
+use crate::classic::clvk_tools::ir::r#type::IRRepr;
+use crate::classic::clvk_tools::ir::reader::read_ir;
+use crate::classic::clvk_tools::node_path::NodePath;
+use crate::classic::clvk_tools::pattern_match::match_sexp;
+use crate::classic::clvk_tools::stages;
+use crate::classic::clvk_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use crate::classic::clvk_tools::stages::stage_2::operators::run_program_for_search_paths;
+use crate::classic::clvk_tools::stages::stage_2::optimize::sub_args;
 use crate::classic::platform::argparse::{
     Argument, ArgumentParser, NArgsSpec, TArgumentParserProps,
 };
@@ -155,7 +155,7 @@ fn mid_negative_value_bin() {
     let atom = sexp_from_stream(
         &mut allocator,
         &mut stream,
-        Box::new(SimpleCreateKLVMObject {}),
+        Box::new(SimpleCreateCLVKObject {}),
     )
     .expect("should be able to make nodeptr");
     if let SExp::Atom = allocator.sexp(atom.1) {
@@ -603,7 +603,7 @@ fn pool_member_innerpuz() {
           ; pool_reward_height is the block height that the reward was generated at. This is used to calculate the coin ID.
           ; key_value_list is signed extra data that the wallet may want to publicly announce for syncing purposes
         
-          (include condition_codes.klvm)
+          (include condition_codes.clvk)
           (include singleton_truths.clib)
         
           ; takes a lisp tree and returns the hash of it

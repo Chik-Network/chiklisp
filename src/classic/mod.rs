@@ -1,3 +1,3 @@
-pub mod klvm;
-pub mod klvm_tools;
+pub mod clvk;
+pub mod clvk_tools;
 pub mod platform;

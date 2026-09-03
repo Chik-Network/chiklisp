@@ -2,17 +2,17 @@ use std::collections::HashMap;
 use std::fs;
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
-use klvm_rs::error::EvalErr;
+use clvk_rs::allocator::Allocator;
+use clvk_rs::error::EvalErr;
 
-use crate::classic::klvm::sexp::sexp_as_bin;
-use crate::classic::klvm_tools::stages::stage_0::{
+use crate::classic::clvk::sexp::sexp_as_bin;
+use crate::classic::clvk_tools::stages::stage_0::{
     DefaultProgramRunner, RunProgramOption, TRunProgram,
 };
+use crate::compiler::clvk::{convert_from_clvk_rs, convert_to_clvk_rs};
 use crate::compiler::compiler::{compile_file, DefaultCompilerOpts};
 use crate::compiler::comptypes::{CompileErr, CompilerOpts};
 use crate::compiler::dialect::AcceptedDialect;
-use crate::compiler::klvm::{convert_from_klvm_rs, convert_to_klvm_rs};
 use crate::compiler::runtypes::RunFailure;
 use crate::compiler::sexp::{parse_sexp, SExp};
 use crate::compiler::srcloc::Srcloc;
@@ -38,8 +38,8 @@ fn run_with_cost(
     sexp: Rc<SExp>,
     env: Rc<SExp>,
 ) -> Result<CompileRunResult, RunFailure> {
-    let as_classic_program = convert_to_klvm_rs(allocator, sexp.clone())?;
-    let as_classic_env = convert_to_klvm_rs(allocator, env.clone())?;
+    let as_classic_program = convert_to_clvk_rs(allocator, sexp.clone())?;
+    let as_classic_env = convert_to_clvk_rs(allocator, env.clone())?;
     let compiled_hex = sexp_as_bin(allocator, as_classic_program).hex();
     runner
         .run_program(
@@ -69,7 +69,7 @@ fn run_with_cost(
             Ok(CompileRunResult {
                 compiled: sexp.clone(),
                 compiled_hex,
-                run_result: convert_from_klvm_rs(allocator, sexp.loc(), reduction.1)?,
+                run_result: convert_from_clvk_rs(allocator, sexp.loc(), reduction.1)?,
             })
         })
 }

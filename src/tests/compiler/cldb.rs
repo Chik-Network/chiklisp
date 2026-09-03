@@ -2,14 +2,14 @@ use std::collections::{BTreeMap, HashMap};
 use std::fs;
 use std::rc::Rc;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 
-use crate::classic::klvm_tools::cmds::{cldb_hierarchy, CldbHierarchyArgs, YamlElement};
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk_tools::cmds::{cldb_hierarchy, CldbHierarchyArgs, YamlElement};
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 use crate::compiler::cldb::{hex_to_modern_sexp, CldbNoOverride, CldbRun, CldbRunEnv, FAVOR_HEX};
+use crate::compiler::clvk::{start_step, RunStep};
 use crate::compiler::compiler::{compile_file, DefaultCompilerOpts};
 use crate::compiler::comptypes::CompilerOpts;
-use crate::compiler::klvm::{start_step, RunStep};
 use crate::compiler::prims;
 use crate::compiler::sexp::{parse_sexp, SExp};
 use crate::compiler::srcloc::Srcloc;
@@ -42,7 +42,7 @@ trait StepOfCldbViewer {
     }
 }
 
-fn run_klvm_in_cldb<V>(
+fn run_clvk_in_cldb<V>(
     program_name: &str,
     program_lines: Rc<Vec<String>>,
     program: Rc<SExp>,
@@ -91,7 +91,7 @@ struct DoesntWatchCldb {}
 impl StepOfCldbViewer for DoesntWatchCldb {}
 
 #[test]
-fn test_run_klvm_in_cldb() {
+fn test_run_clvk_in_cldb() {
     let program_name = "fact.clsp";
     let program_code = "(mod (X) (include *standard-cl-21*) (defun fact (X) (if (> X 1) (* X (fact (- X 1))) 1)) (fact X))";
     let mut allocator = Allocator::new();
@@ -112,7 +112,7 @@ fn test_run_klvm_in_cldb() {
     let program_lines: Vec<String> = program_code.lines().map(|x| x.to_string()).collect();
 
     assert_eq!(
-        run_klvm_in_cldb(
+        run_clvk_in_cldb(
             program_name,
             Rc::new(program_lines),
             Rc::new(program.to_sexp()),
@@ -363,7 +363,7 @@ fn test_cldb_explicit_throw() {
     let mut watcher = ExpectFailure::new(true, Some("(2)".to_string()));
 
     assert_eq!(
-        run_klvm_in_cldb(
+        run_clvk_in_cldb(
             program_name,
             program_lines,
             program,
@@ -379,8 +379,8 @@ fn test_cldb_explicit_throw() {
 }
 
 #[test]
-fn test_klvm_operator_with_weird_tail() {
-    let filename = "test-weird-tail.klvm";
+fn test_clvk_operator_with_weird_tail() {
+    let filename = "test-weird-tail.clvk";
     let loc = Srcloc::start(filename);
     let program = "(+ (q . 3) (q . 5) . \"\")";
     let parsed = parse_sexp(loc.clone(), program.as_bytes().iter().copied()).expect("should parse");
@@ -388,7 +388,7 @@ fn test_klvm_operator_with_weird_tail() {
     let program_lines = Rc::new(vec![program.to_string()]);
 
     assert_eq!(
-        run_klvm_in_cldb(
+        run_clvk_in_cldb(
             filename,
             program_lines,
             parsed[0].clone(),
@@ -403,7 +403,7 @@ fn test_klvm_operator_with_weird_tail() {
 
 #[test]
 fn test_cldb_with_favor_hex() {
-    let filename = "favor_hex.klvm";
+    let filename = "favor_hex.clvk";
     let loc = Srcloc::start(filename);
     let program = "(concat (1 . 1) (1 . 1122334455))";
     let parsed = parse_sexp(loc.clone(), program.as_bytes().iter().copied()).expect("should parse");
@@ -411,7 +411,7 @@ fn test_cldb_with_favor_hex() {
     let program_lines = Rc::new(vec![program.to_string()]);
 
     assert_eq!(
-        run_klvm_in_cldb(
+        run_clvk_in_cldb(
             filename,
             program_lines,
             parsed[0].clone(),
@@ -457,7 +457,7 @@ fn test_cldb_hierarchy_before_hex() {
 
 #[test]
 fn test_cldb_operators_outside_guard() {
-    let filename = "coinid.klvm";
+    let filename = "coinid.clvk";
     let loc = Srcloc::start(filename);
     let inputs_outputs = [
         (
@@ -489,7 +489,7 @@ fn test_cldb_operators_outside_guard() {
         let program_lines = Rc::new(vec![program.to_string()]);
 
         assert_eq!(
-            run_klvm_in_cldb(
+            run_clvk_in_cldb(
                 filename,
                 program_lines,
                 parsed[0].clone(),

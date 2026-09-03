@@ -12,7 +12,7 @@ module-name = "chiklisp._chiklisp"
 name = "chiklisp"
 dynamic = ["version"]
 
-# - Reenable these when we switch over from klvm_tools.
+# - Reenable these when we switch over from clvk_tools.
 # [project.scripts]
 # brun = "chiklisp.cmds:brun"
 # run = "chiklisp.cmds:run"

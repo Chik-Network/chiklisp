@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::classic::klvm::__type_compatibility__::{sha256, Bytes, BytesFromType};
+use crate::classic::clvk::__type_compatibility__::{sha256, Bytes, BytesFromType};
 
 use crate::compiler::sexp::SExp;
 use crate::util::u8_from_number;
@@ -16,10 +16,10 @@ use crate::util::u8_from_number;
 /// A fuller explanation:e
 ///
 /// This is purely syntactic so there's no environment in play here, basically
-/// just about the KLVM value space and how program source code is represented in
-/// KLVM values.
+/// just about the CLVK value space and how program source code is represented in
+/// CLVK values.
 ///
-/// These are all equivalent in KLVM:
+/// These are all equivalent in CLVK:
 ///
 /// ##    "Y" Y 89 0x59
 ///
@@ -27,7 +27,7 @@ use crate::util::u8_from_number;
 ///
 /// ##    (list Y "Y" 89 0x59) ;; 1
 ///
-/// Gives the compiler back a KLVM expression that could mean any of these
+/// Gives the compiler back a CLVK expression that could mean any of these
 /// things:
 ///
 /// ##    (c Y (c Y (c Y (c Y ()))))
@@ -124,14 +124,14 @@ fn relabel_inner_(
 ///
 /// (defmacro M (VAR) (q . 87))
 ///
-/// As originally envisioned, chiklisp macros compile to KLVM programs and consume
-/// the program as KLVM code.  When the language is maximally permissive this isn't
+/// As originally envisioned, chiklisp macros compile to CLVK programs and consume
+/// the program as CLVK code.  When the language is maximally permissive this isn't
 /// inconsistent; a "W" string is the same representation as a W atom (an
 /// identifier) and the number 87.  The problem is when users want the language to
 /// distinguish between legal and illegal uses of identifiers, this poses a
 /// problem.
 ///
-/// In the above code, the macro produces a KLVM value.  That value has a valid
+/// In the above code, the macro produces a CLVK value.  That value has a valid
 /// interpretation as the number 87, the string constant "W" or the identifier W.
 /// If I make the rule that 'identifiers must be bound' under these conditions
 /// then I've also made the rule that "one cannot return a number from a macro that
@@ -139,7 +139,7 @@ fn relabel_inner_(
 /// likely isn't expected given that the chiklisp language gives the user the
 /// ability to input this value in the distinct forms of integer, identifier,
 /// string and such.  Therefore, the 87 here and the W in the next paragraph refer
-/// to the same ambigious value in the KLVM value space.  A fix for this has been
+/// to the same ambigious value in the CLVK value space.  A fix for this has been
 /// held off for a while while a good long term solution was thought through, which
 /// will appear in the form of macros that execute in the value space of chiklisp
 /// SExp (with distinctions between string, integer, identifier etc) and that

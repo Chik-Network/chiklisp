@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use klvmr::allocator::{Allocator, NodePtr, SExp};
+use clvkr::allocator::{Allocator, NodePtr, SExp};
 
-use crate::classic::klvm::sexp::proper_list;
+use crate::classic::clvk::sexp::proper_list;
 
 use crate::compiler::sexp::decode_string;
 

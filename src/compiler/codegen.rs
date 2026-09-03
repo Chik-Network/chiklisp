@@ -6,9 +6,10 @@ use std::rc::Rc;
 
 use num_bigint::ToBigInt;
 
-use crate::classic::klvm::__type_compatibility__::{bi_one, bi_zero};
-use crate::classic::klvm_tools::node_path::compose_paths;
+use crate::classic::clvk::__type_compatibility__::{bi_one, bi_zero};
+use crate::classic::clvk_tools::node_path::compose_paths;
 
+use crate::compiler::clvk::{run, truthy};
 use crate::compiler::compiler::{compile_from_compileform, is_at_capture};
 use crate::compiler::comptypes::{
     fold_m, join_vecs_to_string, list_to_cons, Binding, BindingPattern, BodyForm, CallSpec,
@@ -21,7 +22,6 @@ use crate::compiler::evaluate::{is_apply_atom, Evaluator, EVAL_STACK_LIMIT};
 use crate::compiler::frontend::{compile_bodyform, make_provides_set};
 use crate::compiler::gensym::gensym;
 use crate::compiler::inline::{replace_in_inline, synthesize_args};
-use crate::compiler::klvm::{run, truthy};
 use crate::compiler::lambda::lambda_codegen;
 use crate::compiler::optimize::depgraph::{DepgraphOptions, FunctionDependencyGraph};
 use crate::compiler::prims::{primapply, primcons, primquote};
@@ -324,7 +324,7 @@ fn is_defun_or_constant_in_codegen(
     None
 }
 
-// At the KLVM level, given a list of klvm expressios, make an expression
+// At the CLVK level, given a list of clvk expressios, make an expression
 // that contains that list using conses.
 fn make_list(loc: Srcloc, elements: Vec<Rc<SExp>>) -> Rc<SExp> {
     let mut res = Rc::new(SExp::Nil(loc.clone()));
@@ -335,8 +335,8 @@ fn make_list(loc: Srcloc, elements: Vec<Rc<SExp>>) -> Rc<SExp> {
 }
 
 //
-// Get the klvm expression that represents the indicated function as a
-// callable value using the KLVM a operator.  This value can be returned
+// Get the clvk expression that represents the indicated function as a
+// callable value using the CLVK a operator.  This value can be returned
 // and even passed to another program because it carries the required
 // environment to call functions it depends on from the call site.
 //
@@ -432,7 +432,7 @@ fn create_name_lookup(
     // If the lookup is in head position, then it is a lookup as a callable,
     // otherwise it's a lookup as a variable, which means that if a function
     // is named, it will be built into an expression that allows it to be
-    // called by a KLVM 'a' operator as one would expect, regardless of how
+    // called by a CLVK 'a' operator as one would expect, regardless of how
     // it integrates with the rest of the program it lives in.
     as_variable: NameLookupType,
 ) -> Result<Rc<SExp>, CompileErr> {
@@ -449,7 +449,7 @@ fn create_name_lookup(
                     let find_program = Rc::new(SExp::Integer(l.clone(), early_stepping_truncate_to_u64(opts.clone(), i)));
                     if matches!(as_variable, NameLookupType::ReferenceAsVariable) && matches!(is_defun, Some(EnvDefinitionStatus::IsDefun)) {
                         // It's a defun.  Harden the result so it is callable
-                        // directly by the KLVM 'a' operator.
+                        // directly by the CLVK 'a' operator.
                         Ok(lambda_for_defun(
                             compiler,
                             opts.clone(),

@@ -1,15 +1,15 @@
 import pytest
 from hashlib import sha256
 from contextlib import asynccontextmanager
-from chik.klvm.spend_sim import SimClient, SpendSim
+from chik.clvk.spend_sim import SimClient, SpendSim
 from pathlib import Path
-from klvm.casts import int_to_bytes, int_from_bytes
+from clvk.casts import int_to_bytes, int_from_bytes
 
 from hsms.streamables.program import Program
-from chiklisp import compile_klvm
-from klvm_tools.binutils import disassemble
+from chiklisp import compile_clvk
+from clvk_tools.binutils import disassemble
 
-from klvm.EvalError import EvalError
+from clvk.EvalError import EvalError
 from chik.types.mempool_inclusion_status import MempoolInclusionStatus
 from chik.util.errors import Err
 from dataclasses import dataclass
@@ -19,22 +19,22 @@ from chik.types.spend_bundle import SpendBundle
 from chik.types.coin_spend import CoinSpend
 from blspy import G2Element
 
-from steprun import diag_run_klvm, compile_module_with_symbols
+from steprun import diag_run_clvk, compile_module_with_symbols
 
 compile_module_with_symbols(['.'],'referee.clsp')
-referee = Program.from_bytes(bytes.fromhex(open("referee.klvm.hex").read()))
+referee = Program.from_bytes(bytes.fromhex(open("referee.clvk.hex").read()))
 refhash = referee.tree_hash()
 compile_module_with_symbols(['.'],'referee_accuse.clsp')
-referee_accuse = Program.from_bytes(bytes.fromhex(open("referee_accuse.klvm.hex").read()))
+referee_accuse = Program.from_bytes(bytes.fromhex(open("referee_accuse.clvk.hex").read()))
 refaccusehash = referee.tree_hash()
-compile_klvm('rockpaperscissorsa.clsp', 'rockpaperscissorsa.klvm.hex', ['.'])
-MOD_A = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsa.klvm.hex").read()))
-compile_klvm('rockpaperscissorsb.clsp', 'rockpaperscissorsb.klvm.hex', ['.'])
-MOD_B = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsb.klvm.hex").read()))
-compile_klvm('rockpaperscissorsc.clsp', 'rockpaperscissorsc.klvm.hex', ['.'])
-MOD_C = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsc.klvm.hex").read()))
-compile_klvm('rockpaperscissorsd.clsp', 'rockpaperscissorsd.klvm.hex', ['.'])
-MOD_D = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsd.klvm.hex").read()))
+compile_clvk('rockpaperscissorsa.clsp', 'rockpaperscissorsa.clvk.hex', ['.'])
+MOD_A = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsa.clvk.hex").read()))
+compile_clvk('rockpaperscissorsb.clsp', 'rockpaperscissorsb.clvk.hex', ['.'])
+MOD_B = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsb.clvk.hex").read()))
+compile_clvk('rockpaperscissorsc.clsp', 'rockpaperscissorsc.clvk.hex', ['.'])
+MOD_C = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsc.clvk.hex").read()))
+compile_clvk('rockpaperscissorsd.clsp', 'rockpaperscissorsd.clvk.hex', ['.'])
+MOD_D = Program.from_bytes(bytes.fromhex(open("rockpaperscissorsd.clvk.hex").read()))
 
 move = 0
 accuse = 1

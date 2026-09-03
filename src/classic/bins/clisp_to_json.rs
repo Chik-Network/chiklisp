@@ -1,4 +1,4 @@
-extern crate klvmr as klvm_rs;
+extern crate clvkr as clvk_rs;
 
 use std::env;
 use std::rc::Rc;

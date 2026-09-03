@@ -2,9 +2,9 @@ import hashlib
 
 from hsms.streamables.program import Program
 
-from klvm.EvalError import EvalError
+from clvk.EvalError import EvalError
 
-noncegame = Program.from_bytes(bytes.fromhex(open("noncegame.klvm.hex").read()))
+noncegame = Program.from_bytes(bytes.fromhex(open("noncegame.clvk.hex").read()))
 noncehash = noncegame.tree_hash()
 
 def drun(prog: Program, args: Program):

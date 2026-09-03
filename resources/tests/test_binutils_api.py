@@ -1,6 +1,6 @@
 from chiklisp import binutils
-from klvm_tools.binutils import assemble, disassemble
-from klvm_rs.program import Program
+from clvk_tools.binutils import assemble, disassemble
+from clvk_rs.program import Program
 from random import randint
 
 test_cases = [

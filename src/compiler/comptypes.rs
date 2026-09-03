@@ -5,10 +5,10 @@ use std::rc::Rc;
 
 use serde::Serialize;
 
-use crate::classic::klvm::__type_compatibility__::{Bytes, BytesFromType};
+use crate::classic::clvk::__type_compatibility__::{Bytes, BytesFromType};
 
+use crate::compiler::clvk::{sha256tree, truthy};
 use crate::compiler::dialect::AcceptedDialect;
-use crate::compiler::klvm::{sha256tree, truthy};
 use crate::compiler::sexp::{decode_string, enlist, SExp};
 use crate::compiler::srcloc::Srcloc;
 use crate::compiler::BasicCompileContext;
@@ -67,7 +67,7 @@ pub enum Callable {
     CallDefun(Srcloc, SExp),
     /// The expression expands and inline function.
     CallInline(Srcloc, InlineFunction),
-    /// The expression addresses a klvm primitive (such as a, c, f, =)
+    /// The expression addresses a clvk primitive (such as a, c, f, =)
     CallPrim(Srcloc, SExp),
     /// The expression is a (com ...) invokcation (normally used in macros).
     RunCompiler,
@@ -828,9 +828,9 @@ fn test_helperform_import_qualified_1() {
 pub enum IncludeProcessType {
     /// Include the bytes on disk as an atom.
     Bin,
-    /// Parse the hex on disk and present it as a klvm value.
+    /// Parse the hex on disk and present it as a clvk value.
     Hex,
-    /// Read klvm in s-expression form as a klvm value.
+    /// Read clvk in s-expression form as a clvk value.
     SExpression,
     /// Compile a full program and return its representation.
     Compiled,
@@ -850,7 +850,7 @@ pub struct IncludeDesc {
     /// The relative path to a target or a special directive name.
     pub name: Vec<u8>,
     /// Kind of inclusion.  Determines whether dependencies are recursed and
-    /// what operation is performed on the retrieved klvm form.
+    /// what operation is performed on the retrieved clvk form.
     pub kind: Option<IncludeProcessType>,
     /// Fingerprint of input (SHA-256 tree hash of file bytes when known; otherwise zeros)
     pub fingerprint: [u8; 32],

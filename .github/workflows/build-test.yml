@@ -1,4 +1,4 @@
-# Thanks: klvm_rs' github actions.
+# Thanks: clvk_rs' github actions.
 name: Build
 
 on:
@@ -91,32 +91,32 @@ jobs:
         python -m pip install pytest
         python -m pip install blspy
 
-    - name: install klvm & klvm_tools
+    - name: install clvk & clvk_tools
       run: |
-        git clone https://github.com/Chik-Network/klvm.git --branch=main --single-branch
-        python -m pip install ./klvm
+        git clone https://github.com/Chik-Network/clvk.git --branch=main --single-branch
+        python -m pip install ./clvk
 
-        echo "installing klvm_rs via pip"
-        pip install klvm_rs
+        echo "installing clvk_rs via pip"
+        pip install clvk_rs
 
-        # Ensure klvm_tools is installed from its own repo.
-        echo "installing klvm_tools for klvm tests"
-        git clone https://github.com/Chik-Network/klvm_tools.git --branch=main --single-branch
-        python -m pip install ./klvm_tools
+        # Ensure clvk_tools is installed from its own repo.
+        echo "installing clvk_tools for clvk tests"
+        git clone https://github.com/Chik-Network/clvk_tools.git --branch=main --single-branch
+        python -m pip install ./clvk_tools
 
-        # Install chiklisp pkg as "klvm_tools_rs" for older test framework
-        pip uninstall -v -y klvm_tools_rs
+        # Install chiklisp pkg as "clvk_tools_rs" for older test framework
+        pip uninstall -v -y clvk_tools_rs
         pip install chiklisp
         pip install -e ./tmp
 
 
-    - name: Ensure klvm, klvm_rs, chiklisp are installed
+    - name: Ensure clvk, clvk_rs, chiklisp are installed
       run: |
-        python -c 'import klvm; print("klvm:", klvm.__file__)'
-        python -c 'import klvm_rs; print("klvm_rs", klvm_rs.__file__)'
+        python -c 'import clvk; print("clvk:", clvk.__file__)'
+        python -c 'import clvk_rs; print("clvk_rs", clvk_rs.__file__)'
         python -c 'import chiklisp; print("chiklisp:", chiklisp.__file__)'
-        python -c 'import klvm_tools_rs; print("klvm_tools_rs:", klvm_tools_rs.__file__)'
-        echo "KLVM_TOOLS_RS_VERSION=$(python -c 'import klvm_tools_rs; print(klvm_tools_rs.get_version())')" >> "$GITHUB_ENV"
+        python -c 'import clvk_tools_rs; print("clvk_tools_rs:", clvk_tools_rs.__file__)'
+        echo "CLVK_TOOLS_RS_VERSION=$(python -c 'import clvk_tools_rs; print(clvk_tools_rs.get_version())')" >> "$GITHUB_ENV"
         echo "CHIKLISP_VERSION=$(python -c 'import chiklisp; print(chiklisp.get_version())')" >> "$GITHUB_ENV"
 
     # Test cldb output both run from python and via its command line tool.
@@ -128,17 +128,17 @@ jobs:
         # have happened due to pulling in the trunk versions of other packages that
         # depend on chiklisp.
         pip install --no-index --find-links target/wheels/ chiklisp
-        pip install klvm_rs
-        pip install klvm_tools
+        pip install clvk_rs
+        pip install clvk_tools
         cd resources/tests
-        python test_klvm_step.py
+        python test_clvk_step.py
         python mandelbrot-cldb.py
         python test_compile_from_string.py
         python test_binutils_api.py
 
     - name: "Test step run with mandelbrot, setting print only"
       run: |
-        python ./resources/tests/lib/steprun.py ./resources/tests/mandelbrot/mandelbrot.klvm.hex resources/tests/mandelbrot/mand_args.txt ./resources/tests/mandelbrot/mandelbrot.sym > mand_output.txt
+        python ./resources/tests/lib/steprun.py ./resources/tests/mandelbrot/mandelbrot.clvk.hex resources/tests/mandelbrot/mand_args.txt ./resources/tests/mandelbrot/mandelbrot.sym > mand_output.txt
         # git diff invoked this way returns 0 (as /bin/true) if there is no difference or 1 if there is.
         git diff --no-index -s --quiet -- mand_output.txt ./resources/tests/mandelbrot/mand_test.txt
         # Remove file in a compatible way using git as a general tool
@@ -160,25 +160,25 @@ jobs:
         # Check that recompiling deployed puzzles match with their deployed hashes
         # chik_puzzles is the directory the repo is cloned in.  It contains a subdir
         # called chik_puzzles_py, which is a bit confusing, but that's where the
-        # manage_klvm.py script is.  That's why the code below runs
-        # chik_puzzles_py/manage_klvm.py while being in ./chik_puzzles.
+        # manage_clvk.py script is.  That's why the code below runs
+        # chik_puzzles_py/manage_clvk.py while being in ./chik_puzzles.
         cp support/install_deps.sh support/verify_compiler_version.sh chik_puzzles
         (cd chik_puzzles && python -m venv .venv && . .venv/bin/activate && pip install --upgrade pip && \
         python -m pip install maturin==1.10.2 && \
         cd .. && \
         pip install --no-index --find-links target/wheels/ chiklisp && \
         cd chik_puzzles && \
-        pip install click typing_extensions chik_rs klvm chik_puzzles_py) && \
-        pip uninstall -v -y klvm_tools_rs && \
+        pip install click typing_extensions chik_rs clvk chik_puzzles_py) && \
+        pip uninstall -v -y clvk_tools_rs && \
         pip uninstall -v -y chiklisp && \
         pip install -v --no-index --find-links target/wheels/ chiklisp && \
-        pip uninstall -v -y klvm_tools_rs && \
+        pip uninstall -v -y clvk_tools_rs && \
         echo "PWD:" $(pwd) && \
         pip install -e ./tmp && \
         (cd chik_puzzles && export PYTHONPATH=${PYTHONPATH}:$(pwd) && \
-        ./verify_compiler_version.sh ${KLVM_TOOLS_RS_VERSION} && . .venv/bin/activate && \
+        ./verify_compiler_version.sh ${CLVK_TOOLS_RS_VERSION} && . .venv/bin/activate && \
         echo "Running check" && \
-        python chik_puzzles_py/manage_klvm.py check && \
+        python chik_puzzles_py/manage_clvk.py check && \
         echo "Check successful")
 
     - name: Test Classic command line tools with pytest
@@ -205,20 +205,20 @@ jobs:
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.12')
       run: |
         pip install --no-index --find-links wheel/target/wheels/ chiklisp
-        python resources/tests/test-klvm-recompile-behavior.py
+        python resources/tests/test-clvk-recompile-behavior.py
 
     - name: Install pytest
       run: |
         pip install pytest pytest-asyncio
 
-    - name: Run tests from klvm
+    - name: Run tests from clvk
       run: |
-        cd klvm
+        cd clvk
         pytest tests
 
-    - name: Run tests from klvm_tools
+    - name: Run tests from clvk_tools
       run: |
-        cd klvm_tools
+        cd clvk_tools
         pytest tests
 
     - name: Run tests
@@ -239,8 +239,8 @@ jobs:
     - name: Build alpine wheel via docker
       if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.12')
       run: |
-        cd resources/alpine && docker build -t klvm-tools-rs-alpine .
-        docker run -v ${GITHUB_WORKSPACE}:/root/chiklisp -t klvm-tools-rs-alpine sh /root/build-alpine.sh
+        cd resources/alpine && docker build -t clvk-tools-rs-alpine .
+        docker run -v ${GITHUB_WORKSPACE}:/root/chiklisp -t clvk-tools-rs-alpine sh /root/build-alpine.sh
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v7
@@ -328,7 +328,7 @@ jobs:
         FILES=$(find . -type f -name '*.whl')
         while IFS= read -r file; do
           filename=$(basename $file)
-          aws --no-progress s3 cp "$file" "s3://download.chiknetwork.com/simple-dev/klvm-tools-rs/$filename"
+          aws --no-progress s3 cp "$file" "s3://download.chiknetwork.com/simple-dev/clvk-tools-rs/$filename"
         done <<< "$FILES"
 
   clippy:
@@ -424,11 +424,11 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           python -m pip install --upgrade pip
-      - name: clone klvm_tools so we have an exact match of the tests run in both repos
+      - name: clone clvk_tools so we have an exact match of the tests run in both repos
         run: |
           source venv/bin/activate
-          git clone https://github.com/Chik-Network/klvm_tools.git --branch=main --single-branch
-          pip install ./klvm_tools
+          git clone https://github.com/Chik-Network/clvk_tools.git --branch=main --single-branch
+          pip install ./clvk_tools
       - name: install maturin & pytest
         run: |
           source venv/bin/activate
@@ -448,10 +448,10 @@ jobs:
       #    source venv/bin/activate
       #    pip uninstall -v -y chiklisp
       #    pip install -v --no-index --find-links target/wheels/ chiklisp
-      - name: Install chiklisp pkg as "klvm_tools_rs" for older test framework
+      - name: Install chiklisp pkg as "clvk_tools_rs" for older test framework
         run: |
           source venv/bin/activate
-          pip uninstall -v -y klvm_tools_rs
+          pip uninstall -v -y clvk_tools_rs
           pip install -e ./tmp
       - name: Run pytest in resources/tests/cmdline/tests for coverage
         run: |

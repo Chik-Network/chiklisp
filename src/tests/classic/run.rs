@@ -13,15 +13,15 @@ use std::fs;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 
-use crate::classic::klvm::__type_compatibility__::{bi_one, bi_zero, Stream};
-use crate::classic::klvm::serialize::sexp_to_stream;
-use crate::classic::klvm_tools::binutils::{assemble, disassemble};
-use crate::classic::klvm_tools::cmds::launch_tool;
-use crate::classic::klvm_tools::node_path::NodePath;
+use crate::classic::clvk::__type_compatibility__::{bi_one, bi_zero, Stream};
+use crate::classic::clvk::serialize::sexp_to_stream;
+use crate::classic::clvk_tools::binutils::{assemble, disassemble};
+use crate::classic::clvk_tools::cmds::launch_tool;
+use crate::classic::clvk_tools::node_path::NodePath;
 
-use crate::compiler::klvm::convert_to_klvm_rs;
+use crate::compiler::clvk::convert_to_clvk_rs;
 use crate::compiler::sexp;
 use crate::compiler::sexp::decode_string;
 use crate::util::{number_from_u8, Number};
@@ -310,12 +310,12 @@ fn run_dependencies(filename: &str) -> HashSet<String> {
 
 #[test]
 fn test_get_dependencies_1() {
-    let dep_set = run_dependencies("resources/tests/singleton_top_layer.klvm");
+    let dep_set = run_dependencies("resources/tests/singleton_top_layer.clvk");
 
     eprintln!("dep_set {dep_set:?}");
 
     let mut expect_set = HashSet::new();
-    expect_set.insert("resources/tests/condition_codes.klvm".to_owned());
+    expect_set.insert("resources/tests/condition_codes.clvk".to_owned());
     expect_set.insert("resources/tests/curry-and-treehash.clinc".to_owned());
     expect_set.insert("resources/tests/singleton_truths.clib".to_owned());
 
@@ -675,7 +675,7 @@ fn test_divmod() {
 }
 
 #[cfg(test)]
-pub struct RandomKlvmNumber {
+pub struct RandomClvkNumber {
     pub intended_value: Number,
 }
 
@@ -695,7 +695,7 @@ fn test_classic_mod_form() {
 }
 
 #[cfg(test)]
-pub fn random_klvm_number<R: Rng + ?Sized>(rng: &mut R) -> RandomKlvmNumber {
+pub fn random_clvk_number<R: Rng + ?Sized>(rng: &mut R) -> RandomClvkNumber {
     // Make a number by creating some random atom bytes.
     // Set high bit randomly.
     let natoms = rng.random_range(0..=NUM_GEN_ATOMS);
@@ -716,15 +716,15 @@ pub fn random_klvm_number<R: Rng + ?Sized>(rng: &mut R) -> RandomKlvmNumber {
     }
     let num = number_from_u8(&result_bytes);
 
-    RandomKlvmNumber {
+    RandomClvkNumber {
         intended_value: num,
     }
 }
 
 #[cfg(test)]
-impl Distribution<RandomKlvmNumber> for StandardUniform {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> RandomKlvmNumber {
-        random_klvm_number(rng)
+impl Distribution<RandomClvkNumber> for StandardUniform {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> RandomClvkNumber {
+        random_clvk_number(rng)
     }
 }
 
@@ -733,7 +733,7 @@ impl Distribution<RandomKlvmNumber> for StandardUniform {
 fn test_encoding_properties() {
     let mut rng = ChaChaRng::from_rng(&mut rand::rng());
     for _ in 1..=200 {
-        let number_spec: RandomKlvmNumber = rng.random();
+        let number_spec: RandomClvkNumber = rng.random();
 
         // We'll have it compile a constant value.
         // The representation of the number will come out most likely
@@ -862,7 +862,7 @@ fn test_check_tricky_arg_path_random() {
         .trim()
         .to_string();
         let mut allocator = Allocator::new();
-        let converted = convert_to_klvm_rs(
+        let converted = convert_to_clvk_rs(
             &mut allocator,
             Rc::new(sexp::SExp::Atom(random_tree.loc(), k.clone())),
         )
@@ -925,14 +925,14 @@ fn test_classic_sets_source_file_in_symbols() {
         "--extra-syms".to_string(),
         "--symbol-output-file".to_string(),
         tname.clone(),
-        "resources/tests/assert.klvm".to_string(),
+        "resources/tests/assert.clvk".to_string(),
     ]);
     let read_in_file = fs::read_to_string(&tname).expect("should have dropped symbols");
     let decoded_symbol_file: HashMap<String, String> =
         serde_json::from_str(&read_in_file).expect("should decode");
     assert_eq!(
         decoded_symbol_file.get("source_file").cloned(),
-        Some("resources/tests/assert.klvm".to_string())
+        Some("resources/tests/assert.clvk".to_string())
     );
     fs::remove_file(tname).expect("should have dropped symbols");
 }
@@ -944,7 +944,7 @@ fn test_classic_sets_source_file_in_symbols_only_when_asked() {
         "run".to_string(),
         "--symbol-output-file".to_string(),
         tname.clone(),
-        "resources/tests/assert.klvm".to_string(),
+        "resources/tests/assert.clvk".to_string(),
     ]);
     let read_in_file = fs::read_to_string(&tname).expect("should have dropped symbols");
     fs::remove_file(&tname).expect("should have existed");
@@ -1462,7 +1462,7 @@ fn test_defmac_assert_smoke_preprocess() {
         result_with_preproc.clone(),
         "(0)".to_string(),
     ]);
-    assert_eq!(run_result_false.trim(), "FAIL: klvm raise ()");
+    assert_eq!(run_result_false.trim(), "FAIL: clvk raise ()");
 }
 
 #[test]
@@ -1497,7 +1497,7 @@ fn test_defmac_assert_smoke_preprocess_23() {
         result_with_preproc.clone(),
         "(0)".to_string(),
     ]);
-    assert_eq!(run_result_false.trim(), "FAIL: klvm raise ()");
+    assert_eq!(run_result_false.trim(), "FAIL: clvk raise ()");
 }
 
 #[test]
@@ -2588,7 +2588,7 @@ fn test_big_operator_list() {
         "resources/tests/all_operators.clsp".to_string(),
     ]);
     let target_program =
-        fs::read_to_string("resources/tests/all_operators-0_1_43.klvm").expect("should exist");
+        fs::read_to_string("resources/tests/all_operators-0_1_43.clvk").expect("should exist");
     // Assert that the program output is the same.
     assert_eq!(program, target_program);
     // Run it with an input that exercises every opreator.
@@ -2599,11 +2599,11 @@ fn test_big_operator_list() {
         "--operators-version".to_string(),
         "0".to_string(),
         program,
-        "resources/tests/all_operators_inputs.klvm".to_string(),
+        "resources/tests/all_operators_inputs.clvk".to_string(),
     ])
     .trim()
     .to_string();
-    let target_output = fs::read_to_string("resources/tests/all_operators_result.klvm")
+    let target_output = fs::read_to_string("resources/tests/all_operators_result.clvk")
         .expect("should exist")
         .trim()
         .to_string();
@@ -2741,9 +2741,9 @@ fn test_big_env_program_overflow_and_fix() {
     let big_env_overflow_program =
         fs::read_to_string("./resources/tests/test-env-overflow.clsp").unwrap();
     let compile_and_run = |program| {
-        let klvm_output = do_basic_run(&vec!["run".to_string(), program]);
-        let result = do_basic_brun(&vec!["brun".to_string(), klvm_output.clone()]);
-        (klvm_output, result)
+        let clvk_output = do_basic_run(&vec!["run".to_string(), program]);
+        let result = do_basic_brun(&vec!["brun".to_string(), clvk_output.clone()]);
+        (clvk_output, result)
     };
     let big_env_as_cl24 = big_env_overflow_program
         .replace("standard-cl-26", "standard-cl-24")

@@ -1,43 +1,43 @@
 import pytest
 import random
 from itertools import permutations
-from klvm_rs import Program
-from steprun import diag_run_klvm, compile_module_with_symbols
+from clvk_rs import Program
+from steprun import diag_run_clvk, compile_module_with_symbols
 
 Program.set_run_unsafe_max_cost(11000000000)
 
 compile_module_with_symbols(['.'], 'smoke_test_deep_compare.clsp')
-compare_program = Program.from_bytes(bytes.fromhex(open('smoke_test_deep_compare.klvm.hex').read()))
+compare_program = Program.from_bytes(bytes.fromhex(open('smoke_test_deep_compare.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'smoke_test_sort.clsp')
-sort_program = Program.from_bytes(bytes.fromhex(open('smoke_test_sort.klvm.hex').read()))
+sort_program = Program.from_bytes(bytes.fromhex(open('smoke_test_sort.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'test_sort.clsp')
-test_sort_program = Program.from_bytes(bytes.fromhex(open('test_sort.klvm.hex').read()))
+test_sort_program = Program.from_bytes(bytes.fromhex(open('test_sort.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'test_permutations.clsp')
-test_permutations_program = Program.from_bytes(bytes.fromhex(open('test_permutations.klvm.hex').read()))
+test_permutations_program = Program.from_bytes(bytes.fromhex(open('test_permutations.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'test_reverse.clsp')
-test_reverse_program = Program.from_bytes(bytes.fromhex(open('test_reverse.klvm.hex').read()))
+test_reverse_program = Program.from_bytes(bytes.fromhex(open('test_reverse.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'test_prepend.clsp')
-test_prepend_program = Program.from_bytes(bytes.fromhex(open('test_prepend.klvm.hex').read()))
+test_prepend_program = Program.from_bytes(bytes.fromhex(open('test_prepend.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'test_range.clsp')
-test_range_program = Program.from_bytes(bytes.fromhex(open('test_range.klvm.hex').read()))
+test_range_program = Program.from_bytes(bytes.fromhex(open('test_range.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'smoke_test_permutations.clsp')
-smoke_test_permutations_program = Program.from_bytes(bytes.fromhex(open('smoke_test_permutations.klvm.hex').read()))
+smoke_test_permutations_program = Program.from_bytes(bytes.fromhex(open('smoke_test_permutations.clvk.hex').read()))
 
 compile_module_with_symbols(['.'], 'test_handcalc.clsp')
-test_handcalc_program = Program.from_bytes(bytes.fromhex(open('test_handcalc.klvm.hex').read()))
+test_handcalc_program = Program.from_bytes(bytes.fromhex(open('test_handcalc.clvk.hex').read()))
 
 def test_smoke_compare():
     compare_program.run(Program.to([]))
 
 def test_handcalc():
-    diag_run_klvm(test_handcalc_program, Program.to([]), 'test_handcalc.sym')
+    diag_run_clvk(test_handcalc_program, Program.to([]), 'test_handcalc.sym')
 
 def proper_list_inner(result,cl):
     if hasattr(cl, 'pair') and cl.pair is not None:
@@ -104,20 +104,20 @@ def test_permutations_2():
     all_b_string = 0x626262626262
     for try_list in [[all_a_string,all_b_string], [all_b_string,all_a_string]]:
         want_set = list([list(v) for v in sorted(permutations(try_list))])
-        listed_result = diag_run_klvm(smoke_test_permutations_program, Program.to([try_list]), 'smoke_test_permutations.sym')
+        listed_result = diag_run_clvk(smoke_test_permutations_program, Program.to([try_list]), 'smoke_test_permutations.sym')
         pl = proper_list(listed_result)
         perms_result = sorted([int_list(x) for x in de_none_list(pl)])
         assert want_set == perms_result
 
 def test_chiklisp_sort_program():
-    diag_run_klvm(test_sort_program, Program.to([]), 'test_sort.sym')
+    diag_run_clvk(test_sort_program, Program.to([]), 'test_sort.sym')
 
 def test_permutations_n():
     for i in range(3,6):
         do_test_permutations_of_size_n(i)
 
 def test_chiklisp_permutations_program():
-    diag_run_klvm(test_permutations_program, Program.to([3, 5]), 'test_permutations.sym')
+    diag_run_clvk(test_permutations_program, Program.to([3, 5]), 'test_permutations.sym')
 
 def test_smoke_sort():
     for length in range(7): # 0-7 length

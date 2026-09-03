@@ -4,10 +4,10 @@ import io
 from typing import Any, Callable, Dict, Set, Tuple
 
 from chik_rs import run_chik_program, tree_hash
-from klvm import SExp
-from klvm.casts import int_from_bytes
-from klvm.EvalError import EvalError
-from klvm.serialize import sexp_from_stream, sexp_to_stream
+from clvk import SExp
+from clvk.casts import int_from_bytes
+from clvk.EvalError import EvalError
+from clvk.serialize import sexp_from_stream, sexp_to_stream
 
 from chik.types.blockchain_format.sized_bytes import bytes32
 from chik.util.byte_types import hexstr_to_bytes
@@ -90,7 +90,7 @@ class Program(SExp):
         ```
 
         This is a convenience method intended for use in the wallet or command-line hacks where
-        it would be easier to morph elements of an existing klvm object tree than to rebuild
+        it would be easier to morph elements of an existing clvk object tree than to rebuild
         one from scratch.
 
         Note that `Program` objects are immutable. This function returns a new object; the
@@ -117,11 +117,11 @@ class Program(SExp):
         cost, r = self.run_with_cost(INFINITE_COST, args)
         return r
 
-    # Replicates the curry function from klvm_tools, taking advantage of *args
+    # Replicates the curry function from clvk_tools, taking advantage of *args
     # being a list.  We iterate through args in reverse building the code to
-    # create a klvm list.
+    # create a clvk list.
     #
-    # Given arguments to a function addressable by the '1' reference in klvm
+    # Given arguments to a function addressable by the '1' reference in clvk
     #
     # fixed_args = 1
     #

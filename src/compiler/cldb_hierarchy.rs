@@ -2,15 +2,15 @@ use std::borrow::Borrow;
 use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 use num_bigint::ToBigInt;
 
-use crate::classic::klvm::__type_compatibility__::{Bytes, BytesFromType};
-use crate::classic::klvm_tools::stages::stage_0::TRunProgram;
+use crate::classic::clvk::__type_compatibility__::{Bytes, BytesFromType};
+use crate::classic::clvk_tools::stages::stage_0::TRunProgram;
 
 use crate::compiler::cldb::{CldbNoOverride, CldbRun, CldbRunEnv};
-use crate::compiler::klvm;
-use crate::compiler::klvm::{sha256tree, truthy, RunStep};
+use crate::compiler::clvk;
+use crate::compiler::clvk::{sha256tree, truthy, RunStep};
 use crate::compiler::runtypes::RunFailure;
 use crate::compiler::sexp::{decode_string, parse_sexp, SExp};
 use crate::compiler::srcloc::Srcloc;
@@ -95,7 +95,7 @@ pub fn get_fun_hash(op: Rc<SExp>, sexp: Rc<SExp>) -> Option<(Vec<u8>, Rc<SExp>, 
     if let SExp::Cons(_, prog, args) = sexp.borrow() {
         if is_apply_op(op) {
             if let SExp::Cons(_, env, _) = args.borrow() {
-                return Some((klvm::sha256tree(prog.clone()), prog.clone(), env.clone()));
+                return Some((clvk::sha256tree(prog.clone()), prog.clone(), env.clone()));
             }
         }
     }
@@ -201,7 +201,7 @@ impl HierarchiklRunner {
         prog: Rc<SExp>,
         env: Rc<SExp>,
     ) -> Self {
-        let step = klvm::start_step(prog.clone(), env.clone());
+        let step = clvk::start_step(prog.clone(), env.clone());
         let run = CldbRun::new(
             runner.clone(),
             prim_map.clone(),
@@ -245,8 +245,8 @@ impl HierarchiklRunner {
                 function_hash: sha256tree(prog.clone()),
                 function_name: input_file.unwrap_or_else(|| {
                     format!(
-                        "klvm_program_{}",
-                        hex_of_hash(&klvm::sha256tree(prog.clone()))
+                        "clvk_program_{}",
+                        hex_of_hash(&clvk::sha256tree(prog.clone()))
                     )
                 }),
                 function_arguments: fun_args,
@@ -274,7 +274,7 @@ impl HierarchiklRunner {
     }
 
     fn push_synthetic_stack_frame(&mut self, current_env: Rc<SExp>, info: &RunStepRelevantInfo) {
-        let arg_step = klvm::start_step(info.prog.clone(), info.runtime_argument_values.clone());
+        let arg_step = clvk::start_step(info.prog.clone(), info.runtime_argument_values.clone());
 
         let mut arg_run = CldbRun::new(
             self.runner.clone(),
@@ -316,7 +316,7 @@ impl HierarchiklRunner {
         };
 
         // Make an empty frame to repopulate (maybe option here?).
-        let step = klvm::start_step(info.prog.clone(), current_env.clone());
+        let step = clvk::start_step(info.prog.clone(), current_env.clone());
         let mut run = CldbRun::new(
             self.runner.clone(),
             self.prim_map.clone(),
@@ -377,7 +377,7 @@ impl HierarchiklRunner {
 
             self.running[idx].env = outcome;
 
-            let step = klvm::step_return_value(
+            let step = clvk::step_return_value(
                 &self.running[idx].run.current_step(),
                 self.running[idx].env.clone(),
             );

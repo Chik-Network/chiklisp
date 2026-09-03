@@ -1,20 +1,20 @@
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 use std::collections::HashMap;
 use std::fs;
 use std::rc::Rc;
 
-use crate::classic::klvm::__type_compatibility__::Stream;
-use crate::classic::klvm::sexp::rest;
-use crate::classic::klvm_tools::binutils::{assemble, assemble_from_ir, disassemble};
-use crate::classic::klvm_tools::cmds::call_tool;
-use crate::classic::klvm_tools::ir::reader::read_ir;
-use crate::classic::klvm_tools::klvmc::compile_klvm_text;
-use crate::classic::klvm_tools::stages::stage_2::compile::{
+use crate::classic::clvk::__type_compatibility__::Stream;
+use crate::classic::clvk::sexp::rest;
+use crate::classic::clvk_tools::binutils::{assemble, assemble_from_ir, disassemble};
+use crate::classic::clvk_tools::clvkc::compile_clvk_text;
+use crate::classic::clvk_tools::cmds::call_tool;
+use crate::classic::clvk_tools::ir::reader::read_ir;
+use crate::classic::clvk_tools::stages::stage_2::compile::{
     do_com_prog, get_compile_filename, get_last_path_component, try_expand_macro_for_atom,
 };
-use crate::classic::klvm_tools::stages::stage_2::helpers::{brun, evaluate, quote, run};
-use crate::classic::klvm_tools::stages::stage_2::operators::run_program_for_search_paths;
-use crate::classic::klvm_tools::stages::stage_2::reader::{process_embed_file, read_file};
+use crate::classic::clvk_tools::stages::stage_2::helpers::{brun, evaluate, quote, run};
+use crate::classic::clvk_tools::stages::stage_2::operators::run_program_for_search_paths;
+use crate::classic::clvk_tools::stages::stage_2::reader::{process_embed_file, read_file};
 
 use crate::compiler::compiler::DefaultCompilerOpts;
 use crate::compiler::comptypes::{CompileErr, CompilerOpts, HasCompilerOptsDelegation};
@@ -224,7 +224,7 @@ fn test_process_embed_file_as_sexp() {
 }
 
 /// A test where a file is in an unexpected location was requested.
-/// This test tries to read resources/tests/steprun/fact.klvm.hex but specifies
+/// This test tries to read resources/tests/steprun/fact.clvk.hex but specifies
 /// resources/tests/stage_2 as an include path.
 #[test]
 fn test_process_embed_file_as_sexp_in_an_unexpected_location() {
@@ -235,13 +235,13 @@ fn test_process_embed_file_as_sexp_in_an_unexpected_location() {
         false,
         0,
     );
-    let sexp_triggering_read = assemble(&mut allocator, "(embed-file test-file hex act.klvm.hex)")
+    let sexp_triggering_read = assemble(&mut allocator, "(embed-file test-file hex act.clvk.hex)")
         .expect("should assemble");
     let res = read_file(
         runner,
         &mut allocator,
         sexp_triggering_read,
-        "fact.klvm.hex",
+        "fact.clvk.hex",
     );
     assert!(res.is_err());
 }
@@ -256,17 +256,17 @@ fn test_process_embed_file_as_sexp_in_an_expected_location() {
         false,
         0,
     );
-    let sexp_triggering_read = assemble(&mut allocator, "(embed-file test-file hex act.klvm.hex)")
+    let sexp_triggering_read = assemble(&mut allocator, "(embed-file test-file hex act.clvk.hex)")
         .expect("should assemble");
     let res = read_file(
         runner,
         &mut allocator,
         sexp_triggering_read,
-        "fact.klvm.hex",
+        "fact.clvk.hex",
     )
     .expect("should exist");
     let real_file_content =
-        fs::read_to_string("resources/tests/steprun/fact.klvm.hex").expect("should exist");
+        fs::read_to_string("resources/tests/steprun/fact.clvk.hex").expect("should exist");
     assert_eq!(res.data, real_file_content.as_bytes().to_vec());
 }
 
@@ -277,7 +277,7 @@ fn test_process_embed_file_as_hex() {
         run_program_for_search_paths("*test*", &vec!["resources/tests".to_string()], false, 0);
     let declaration_sexp = assemble(
         &mut allocator,
-        "(embed-file test-embed-from-hex hex steprun/fact.klvm.hex)",
+        "(embed-file test-embed-from-hex hex steprun/fact.clvk.hex)",
     )
     .expect("should assemble");
     let (name, content) =
@@ -290,7 +290,7 @@ fn test_process_embed_file_as_hex() {
         "opd",
         &[
             "opd".to_string(),
-            "resources/tests/steprun/fact.klvm.hex".to_string(),
+            "resources/tests/steprun/fact.clvk.hex".to_string(),
         ],
     )
     .expect("should work");
@@ -369,7 +369,7 @@ fn test_classic_compiler_with_compiler_opts() {
     let mut allocator = Allocator::new();
     let mut symbols = HashMap::new();
     // Verify injection
-    let result = compile_klvm_text(
+    let result = compile_clvk_text(
         &mut allocator,
         opts.clone(),
         &mut symbols,
@@ -383,7 +383,7 @@ fn test_classic_compiler_with_compiler_opts() {
         "(a (q 2 2 (c 2 (c 5 ()))) (c (q 16 5 (q . 1)) 1))"
     );
     // Verify lack of injection
-    let result_no_injection = compile_klvm_text(
+    let result_no_injection = compile_clvk_text(
         &mut allocator,
         opts,
         &mut symbols,

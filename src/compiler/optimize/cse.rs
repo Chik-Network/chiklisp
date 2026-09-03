@@ -4,6 +4,7 @@ use std::collections::{BTreeMap, HashSet};
 use std::fmt::{Debug, Error, Formatter};
 use std::rc::Rc;
 
+use crate::compiler::clvk::sha256tree;
 use crate::compiler::comptypes::{
     Binding, BindingPattern, BodyForm, CompileErr, CompilerOpts, LambdaData, LetData,
     LetFormInlineHint, LetFormKind,
@@ -11,7 +12,6 @@ use crate::compiler::comptypes::{
 use crate::compiler::evaluate::{is_apply_atom, is_i_atom};
 use crate::compiler::frontend::{collect_used_names_bodyform, collect_used_names_sexp};
 use crate::compiler::gensym::gensym;
-use crate::compiler::klvm::sha256tree;
 use crate::compiler::lambda::make_cons;
 use crate::compiler::optimize::bodyform::{
     path_overlap_one_way, replace_in_bodyform, retrieve_bodyform, visit_detect_in_bodyform,

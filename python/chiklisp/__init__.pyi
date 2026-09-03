@@ -17,14 +17,14 @@ class _CompileResultWithSymbols(TypedDict):
 def get_version() -> str: ...
 
 @overload
-def compile_klvm(
+def compile_clvk(
     input_path: Any,
     output_path: str,
     search_paths: list[str] = ...,
     export_symbols: None = ...,
 ) -> str: ...
 @overload
-def compile_klvm(
+def compile_clvk(
     input_path: Any,
     output_path: str,
     search_paths: list[str] = ...,
@@ -45,7 +45,7 @@ def compile(
 ) -> _CompileResultWithSymbols: ...
 
 def check_dependencies(input_path: Any, search_paths: list[str] = ...) -> list[str]: ...
-def start_klvm_program(
+def start_clvk_program(
     hex_prog: str,
     hex_args: str,
     symbol_table: dict[str, str] | None,
@@ -70,9 +70,9 @@ __all__ = [
     "call_tool",
     "check_dependencies",
     "compile",
-    "compile_klvm",
+    "compile_clvk",
     "compose_run_function",
     "get_version",
     "launch_tool",
-    "start_klvm_program",
+    "start_clvk_program",
 ]

@@ -1,4 +1,4 @@
-# Taken from klvm_rs' version.
+# Taken from clvk_rs' version.
 name: Build crate
 
 on:

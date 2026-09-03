@@ -9,14 +9,15 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::time::UNIX_EPOCH;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
-use crate::classic::klvm::__type_compatibility__::{bi_one, bi_zero};
-use crate::classic::klvm_tools::ir::r#type::NEW_BIT_CONSTANTS;
-use crate::classic::klvm_tools::stages::stage_0::TRunProgram;
+use crate::classic::clvk::__type_compatibility__::{bi_one, bi_zero};
+use crate::classic::clvk_tools::ir::r#type::NEW_BIT_CONSTANTS;
+use crate::classic::clvk_tools::stages::stage_0::TRunProgram;
 
-use crate::classic::klvm::__type_compatibility__::Stream;
-use crate::classic::klvm::sexp::sexp_as_bin;
+use crate::classic::clvk::__type_compatibility__::Stream;
+use crate::classic::clvk::sexp::sexp_as_bin;
+use crate::compiler::clvk::{convert_to_clvk_rs, run, sha256tree, NewStyleIntConversion};
 use crate::compiler::codegen::{codegen, hoist_body_let_binding, process_helper_let_bindings};
 use crate::compiler::comptypes::{
     BodyForm, CompileErr, CompileForm, CompileModuleComponent, CompileModuleOutput, CompilerOpts,
@@ -26,7 +27,6 @@ use crate::compiler::comptypes::{
 };
 use crate::compiler::dialect::{AcceptedDialect, KNOWN_DIALECTS};
 use crate::compiler::frontend::frontend;
-use crate::compiler::klvm::{convert_to_klvm_rs, run, sha256tree, NewStyleIntConversion};
 use crate::compiler::optimize::depgraph::{DepgraphOptions, FunctionDependencyGraph};
 use crate::compiler::optimize::get_optimizer;
 use crate::compiler::preprocessor::detect_chiklisp_module;
@@ -37,7 +37,7 @@ use crate::compiler::srcloc::Srcloc;
 use crate::compiler::{BasicCompileContext, CompileContextWrapper};
 use crate::util::Number;
 
-pub const SHA256TREE_PROGRAM_KLVM: &str = "(2 (1 2 (3 (7 5) (1 11 (1 . 2) (2 2 (4 2 (4 9 ()))) (2 2 (4 2 (4 13 ())))) (1 11 (1 . 1) 5)) 1) (4 (1 2 (3 (7 5) (1 11 (1 . 2) (2 2 (4 2 (4 9 ()))) (2 2 (4 2 (4 13 ())))) (1 11 (1 . 1) 5)) 1) 1))";
+pub const SHA256TREE_PROGRAM_CLVK: &str = "(2 (1 2 (3 (7 5) (1 11 (1 . 2) (2 2 (4 2 (4 9 ()))) (2 2 (4 2 (4 13 ())))) (1 11 (1 . 1) 5)) 1) (4 (1 2 (3 (7 5) (1 11 (1 . 2) (2 2 (4 2 (4 9 ()))) (2 2 (4 2 (4 13 ())))) (1 11 (1 . 1) 5)) 1) 1))";
 
 pub const FUZZ_TEST_PRE_CSE_MERGE_FIX_FLAG: usize = 1;
 
@@ -151,7 +151,7 @@ pub fn do_desugar(
     })
 }
 
-/// Given a compileform, compile it to klvm.  This comes after preprocessing
+/// Given a compileform, compile it to clvk.  This comes after preprocessing
 /// and desugaring.
 pub fn finish_compilation(
     context: &mut BasicCompileContext,
@@ -413,7 +413,7 @@ pub fn compile_module(
                 opts.clone(),
                 program.clone(),
             )?);
-            let converted = convert_to_klvm_rs(context.allocator(), output.clone())?;
+            let converted = convert_to_clvk_rs(context.allocator(), output.clone())?;
 
             let mut output_path = PathBuf::from(&opts.filename());
             output_path.set_extension("hex");
@@ -635,7 +635,7 @@ pub fn compile_module(
         );
 
         let mut stream = Stream::new(None);
-        let converted_func = convert_to_klvm_rs(context.allocator(), m.content.clone())?;
+        let converted_func = convert_to_clvk_rs(context.allocator(), m.content.clone())?;
         stream.write(sexp_as_bin(context.allocator(), converted_func));
         let hex_data = stream.get_value().hex();
         opts.write_new_file(&output_path, hex_data.as_bytes())?;
@@ -686,7 +686,7 @@ fn add_main_fingerprint(cf: &mut CompileForm, forms: &[Rc<SExp>]) {
 
 fn form_hash_expression(inner_exp: Rc<BodyForm>) -> Rc<BodyForm> {
     let shloc = Srcloc::start("*sha256tree*");
-    let parsed = parse_sexp_flags(shloc.clone(), SHA256TREE_PROGRAM_KLVM.bytes(), 0)
+    let parsed = parse_sexp_flags(shloc.clone(), SHA256TREE_PROGRAM_CLVK.bytes(), 0)
         .expect("should have parsed");
     let p0_borrowed: &SExp = parsed[0].borrow();
 
@@ -737,7 +737,7 @@ fn add_inline_hash_for_constant(program: &mut CompileForm, loc: &Srcloc, fun_nam
     ));
 }
 
-/// Given a set of untreated input forms, compile it as a klvm program.
+/// Given a set of untreated input forms, compile it as a clvk program.
 pub fn compile_pre_forms(
     context: &mut BasicCompileContext,
     mut opts: Rc<dyn CompilerOpts>,
@@ -793,8 +793,8 @@ pub fn compile_pre_forms(
     }
 }
 
-/// Given a file name and content, compile it as a klvm program.  It receives a
-/// klvm runner object, opts, which describes all the variations of compilation
+/// Given a file name and content, compile it as a clvk program.  It receives a
+/// clvk runner object, opts, which describes all the variations of compilation
 /// that are possible and a symbol table result which associates hashes with
 /// names and source locations.  It also contains descriptions of the arguments
 /// and whether each function described accepts a left environment, which affects
@@ -1153,7 +1153,7 @@ pub fn is_cons(atom: &SExp) -> bool {
     is_operator(4, atom)
 }
 
-/// Extracts the environment from a klvm program that contains one.
+/// Extracts the environment from a clvk program that contains one.
 /// The usual form of a program to analyze is:
 /// (2 main (4 env 1))
 pub fn extract_program_and_env(program: Rc<SExp>) -> Option<(Rc<SExp>, Rc<SExp>)> {

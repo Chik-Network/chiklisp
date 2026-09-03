@@ -1,4 +1,4 @@
-use chiklisp::classic::klvm_tools::cmds::opc;
+use chiklisp::classic::clvk_tools::cmds::opc;
 use std::env;
 
 fn main() {

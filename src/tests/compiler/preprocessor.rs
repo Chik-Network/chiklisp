@@ -563,7 +563,7 @@ fn test_preprocessor_tours_includes_properly() {
     let prog = indoc! {"
       ( ;; Note: preprocessing is run in the list of the body forms.
         (include *strict-cl-21*)
-        (include condition_codes.klvm)
+        (include condition_codes.clvk)
         (include curry-and-treehash.clinc)
         ()
       )

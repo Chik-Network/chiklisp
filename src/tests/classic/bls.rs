@@ -1,4 +1,4 @@
-use crate::classic::klvm::__type_compatibility__::{Bytes, BytesFromType};
+use crate::classic::clvk::__type_compatibility__::{Bytes, BytesFromType};
 use crate::tests::classic::run::{do_basic_brun, do_basic_run};
 
 const MSG1: &[u8] = &[

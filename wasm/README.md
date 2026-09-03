@@ -37,15 +37,15 @@ Program
 
 Program is exported by ```chiklisp``` and contains a ```to``` function
 among a few others.  Its use is very like Program.to in the python code and
-similar to chikminejp's ```klvm_tools``` library.  It produces a value that
+similar to chikminejp's ```clvk_tools``` library.  It produces a value that
 can be used together with other such values, can be curried (and uncurried)
 converted to the hex representation and run.
 
 ```Program.to(javascript_value)```
 
 Converts javascript values to SExp objects which can be used together and run
-as KLVM programs or used as program arguments.  This conversion follows simple
-conventions that were established in ```klvm_tools```.
+as CLVK programs or used as program arguments.  This conversion follows simple
+conventions that were established in ```clvk_tools```.
 
 - There's a tuple object returned by the ```t``` function (2 arguments) which
 produces a cons.
@@ -65,7 +65,7 @@ the same as tuple objects above.
 
 ```Program.from_hex(hex_str)```
 
-Converts a string of pairs of hex digits into the KLVM deserialized form of the
+Converts a string of pairs of hex digits into the CLVK deserialized form of the
 object.
 
 ```Program.null()```
@@ -135,7 +135,7 @@ javascript.
 ```SExp.curry(a, b, c ...)```
 
 Given a number of positional arguments, build a curried application that provides
-values for the left arguments of some runnable KLVM code, giving code that can
+values for the left arguments of some runnable CLVK code, giving code that can
 be correctly called with fewer arguments.  This is common for providing values to
 the upper case parameters of chiklisp programs, such as coin puzzles.
 

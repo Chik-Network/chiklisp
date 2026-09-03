@@ -5,7 +5,7 @@ use std::env;
 use std::mem::swap;
 use std::rc::Rc;
 
-use crate::classic::klvm_tools::stages::stage_0::TRunProgram;
+use crate::classic::clvk_tools::stages::stage_0::TRunProgram;
 use crate::compiler::comptypes::{BodyForm, CompileErr, CompilerOpts};
 use crate::compiler::evaluate::{first_of_alist, second_of_alist, Evaluator, EVAL_STACK_LIMIT};
 use crate::compiler::frontend::frontend;
@@ -84,9 +84,9 @@ fn count_depth(s: &str) -> i32 {
 
 impl Repl {
     /// Create a new Repl given a set of CompilerOpts and a chiklisp program
-    /// runner, TRunProgram.  The runner is used to evaluate arbitrary KLVM
+    /// runner, TRunProgram.  The runner is used to evaluate arbitrary CLVK
     /// code when required.  Evaluator implements some primitives itself, but
-    /// many are taken from klvmr.
+    /// many are taken from clvkr.
     pub fn new(opts: Rc<dyn CompilerOpts>, runner: Rc<dyn TRunProgram>) -> Repl {
         let loc = Srcloc::start(&opts.filename());
         let mut toplevel_forms = HashSet::new();

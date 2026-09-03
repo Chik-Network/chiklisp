@@ -2,17 +2,17 @@ import os
 from pathlib import Path
 import binascii
 import json
-from klvm_tools.binutils import assemble, disassemble
-from chiklisp import start_klvm_program, compose_run_function, compile_klvm
+from clvk_tools.binutils import assemble, disassemble
+from chiklisp import start_clvk_program, compose_run_function, compile_clvk
 from chik.types.blockchain_format.program import Program
 
 def compile_module_with_symbols(include_paths,source):
     path_obj = Path(source)
     file_path = path_obj.parent
     file_stem = path_obj.stem
-    target_file = file_path / (file_stem + ".klvm.hex")
+    target_file = file_path / (file_stem + ".clvk.hex")
     sym_file = file_path / (file_stem + ".sym")
-    compile_result = compile_klvm(source, str(target_file.absolute()), include_paths, True)
+    compile_result = compile_clvk(source, str(target_file.absolute()), include_paths, True)
     symbols = compile_result['symbols']
     if len(symbols) != 0:
         with open(str(sym_file.absolute()),'w') as symfile:
@@ -41,11 +41,11 @@ def run_until_end(p):
 
     return last
 
-def diag_run_klvm(program, args, symbols):
+def diag_run_clvk(program, args, symbols):
     hex_form_of_program = binascii.hexlify(bytes(program)).decode('utf8')
     hex_form_of_args = binascii.hexlify(bytes(args)).decode('utf8')
     symbols = json.loads(open(symbols).read())
-    p = start_klvm_program(hex_form_of_program, hex_form_of_args, symbols)
+    p = start_clvk_program(hex_form_of_program, hex_form_of_args, symbols)
     report = run_until_end(p)
     if 'Failure' in report:
         print(report['Failure'])
@@ -55,5 +55,5 @@ if __name__ == '__main__':
     import sys
     program = Program.fromhex(open(sys.argv[1]).read())
     args = Program.fromhex(open(sys.argv[2]).read())
-    diag_run_klvm(program, args)
+    diag_run_clvk(program, args)
 

@@ -3,12 +3,12 @@ use rand::Rng;
 use std::env;
 use std::rc::Rc;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 use subprocess::Exec;
 
-use crate::classic::klvm::__type_compatibility__::Stream;
-use crate::classic::klvm::serialize::sexp_to_stream;
-use crate::classic::klvm_tools::binutils::assemble;
+use crate::classic::clvk::__type_compatibility__::Stream;
+use crate::classic::clvk::serialize::sexp_to_stream;
+use crate::classic::clvk_tools::binutils::assemble;
 use crate::compiler::fuzz::{FuzzGenerator, FuzzTypeParams, Rule};
 use crate::compiler::sexp::{self, enlist, SExp};
 use crate::compiler::srcloc::Srcloc;

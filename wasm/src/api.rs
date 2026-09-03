@@ -10,17 +10,17 @@ use std::sync::atomic::Ordering;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 
 use crate::jsval::{
     btreemap_to_object, get_property, js_object_from_sexp, js_pair, object_to_value,
     read_string_to_string_map, sexp_from_js_object,
 };
 use crate::objects::Program;
-use chiklisp::classic::klvm::__type_compatibility__::{Bytes, Stream, UnvalidatedBytesFromType};
-use chiklisp::classic::klvm::serialize::sexp_to_stream;
-use chiklisp::classic::klvm_tools::klvmc::compile_klvm_inner;
-use chiklisp::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use chiklisp::classic::clvk::__type_compatibility__::{Bytes, Stream, UnvalidatedBytesFromType};
+use chiklisp::classic::clvk::serialize::sexp_to_stream;
+use chiklisp::classic::clvk_tools::clvkc::compile_clvk_inner;
+use chiklisp::classic::clvk_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
 use chiklisp::compiler::cldb::{
     hex_to_modern_sexp, CldbOverrideBespokeCode, CldbRun, CldbRunEnv, CldbRunnable,
     CldbSingleBespokeOverride,
@@ -29,7 +29,7 @@ use chiklisp::compiler::compiler::{
     extract_program_and_env, path_to_function, rewrite_in_program, DefaultCompilerOpts,
 };
 use chiklisp::compiler::comptypes::{CompileErr, CompilerOpts};
-use chiklisp::compiler::klvm::{convert_to_klvm_rs, start_step};
+use chiklisp::compiler::clvk::{convert_to_clvk_rs, start_step};
 use chiklisp::compiler::optimize::get_optimizer;
 use chiklisp::compiler::prims;
 use chiklisp::compiler::repl::Repl;
@@ -108,7 +108,7 @@ where
     result
 }
 
-pub fn create_klvm_runner_err(error: String) -> JsValue {
+pub fn create_clvk_runner_err(error: String) -> JsValue {
     let array = js_sys::Array::new();
     array.set(
         0,
@@ -117,16 +117,16 @@ pub fn create_klvm_runner_err(error: String) -> JsValue {
     object_to_value(&js_sys::Object::from_entries(&array).unwrap())
 }
 
-fn create_klvm_runner_run_failure(err: &RunFailure) -> JsValue {
+fn create_clvk_runner_run_failure(err: &RunFailure) -> JsValue {
     match err {
-        RunFailure::RunErr(l, e) => create_klvm_runner_err(format!("{l}: Error {e}")),
-        RunFailure::RunExn(l, e) => create_klvm_runner_err(format!("{l}: Exn {e}")),
+        RunFailure::RunErr(l, e) => create_clvk_runner_err(format!("{l}: Error {e}")),
+        RunFailure::RunExn(l, e) => create_clvk_runner_err(format!("{l}: Exn {e}")),
     }
 }
 
-fn create_klvm_compile_failure(err: &CompileErr) -> JsValue {
+fn create_clvk_compile_failure(err: &CompileErr) -> JsValue {
     match err {
-        CompileErr(l, e) => create_klvm_runner_err(format!("{l}: Error {e}")),
+        CompileErr(l, e) => create_clvk_runner_err(format!("{l}: Error {e}")),
     }
 }
 
@@ -173,7 +173,7 @@ impl CldbSingleBespokeOverride for JsBespokeOverride {
  * return a runner object.
  */
 #[wasm_bindgen]
-pub fn create_klvm_runner(
+pub fn create_clvk_runner(
     hex_prog: String,
     args_js: JsValue,
     symbols: &js_sys::Object,
@@ -189,7 +189,7 @@ pub fn create_klvm_runner(
     let args = match sexp_from_js_object(args_srcloc.clone(), &args_js) {
         Some(v) => v,
         None => {
-            return create_klvm_runner_run_failure(&RunFailure::RunErr(
+            return create_clvk_runner_run_failure(&RunFailure::RunErr(
                 args_srcloc.clone(),
                 "failed to convert args to sexp".to_string(),
             ));
@@ -199,7 +199,7 @@ pub fn create_klvm_runner(
     let symbol_table = match read_string_to_string_map(symbols) {
         Ok(s) => s,
         Err(e) => {
-            return create_klvm_runner_run_failure(&RunFailure::RunErr(
+            return create_clvk_runner_run_failure(&RunFailure::RunErr(
                 args_srcloc.clone(),
                 format!("failed to read symbol table: {e}"),
             ));
@@ -226,7 +226,7 @@ pub fn create_klvm_runner(
     ) {
         Ok(v) => v,
         Err(e) => {
-            return create_klvm_runner_run_failure(&e);
+            return create_clvk_runner_run_failure(&e);
         }
     };
 
@@ -256,7 +256,7 @@ pub fn final_value(runner: i32) -> JsValue {
 }
 
 #[wasm_bindgen]
-pub fn remove_klvm_runner(runner: i32) {
+pub fn remove_clvk_runner(runner: i32) {
     remove_runner(runner);
 }
 
@@ -310,7 +310,7 @@ pub fn compile(input_js: JsValue, filename_js: JsValue, search_paths_js: Vec<JsV
         .collect();
 
     let opts = Rc::new(DefaultCompilerOpts::new(&filename)).set_search_paths(&search_paths);
-    match compile_klvm_inner(
+    match compile_clvk_inner(
         &mut allocator,
         opts,
         &mut symbol_table,
@@ -320,7 +320,7 @@ pub fn compile(input_js: JsValue, filename_js: JsValue, search_paths_js: Vec<JsV
         false,
     ) {
         Ok(_) => make_compile_output(&result_stream, &symbol_table),
-        Err(e) => create_klvm_runner_err(e),
+        Err(e) => create_clvk_runner_err(e),
     }
 }
 
@@ -348,13 +348,13 @@ pub fn compose_run_function(
     let symbol_table = match read_string_to_string_map(symbol_table_js) {
         Ok(s) => s,
         Err(e) => {
-            return create_klvm_compile_failure(&CompileErr(loc.clone(), e));
+            return create_clvk_compile_failure(&CompileErr(loc.clone(), e));
         }
     };
     let function_hash = match find_function_hash(&symbol_table, &function_name) {
         Some(f) => f,
         _ => {
-            return create_klvm_compile_failure(&CompileErr(
+            return create_clvk_compile_failure(&CompileErr(
                 loc.clone(),
                 format!("function not found in symbols: {function_name}"),
             ));
@@ -363,13 +363,13 @@ pub fn compose_run_function(
     let program = match hex_to_modern_sexp(&mut allocator, &symbol_table, loc.clone(), &hex_prog) {
         Ok(v) => v,
         Err(e) => {
-            return create_klvm_runner_run_failure(&e);
+            return create_clvk_runner_run_failure(&e);
         }
     };
     let main_env = match extract_program_and_env(program.clone()) {
         Some(em) => em,
         _ => {
-            return create_klvm_compile_failure(&CompileErr(
+            return create_clvk_compile_failure(&CompileErr(
                 program.loc(),
                 "could not extract env from program".to_string(),
             ));
@@ -378,7 +378,7 @@ pub fn compose_run_function(
     let hash_bytes =
         match Bytes::new_validated(Some(UnvalidatedBytesFromType::Hex(function_hash.clone()))) {
             Err(e) => {
-                return create_klvm_compile_failure(&CompileErr(program.loc(), e.to_string()));
+                return create_clvk_compile_failure(&CompileErr(program.loc(), e.to_string()));
             }
             Ok(x) => x,
         };
@@ -386,7 +386,7 @@ pub fn compose_run_function(
     let function_path = match path_to_function(main_env.1.clone(), &hash_bytes.data().clone()) {
         Some(p) => p,
         _ => {
-            return create_klvm_compile_failure(&CompileErr(
+            return create_clvk_compile_failure(&CompileErr(
                 program.loc(),
                 format!("could not find function with hash from symbols: {function_name}"),
             ));
@@ -395,13 +395,13 @@ pub fn compose_run_function(
 
     let new_program = rewrite_in_program(function_path, main_env.1);
     let mut result_stream = Stream::new(None);
-    let klvm_rs_value = match convert_to_klvm_rs(&mut allocator, new_program) {
+    let clvk_rs_value = match convert_to_clvk_rs(&mut allocator, new_program) {
         Ok(c) => c,
         Err(e) => {
-            return create_klvm_runner_run_failure(&e);
+            return create_clvk_runner_run_failure(&e);
         }
     };
-    sexp_to_stream(&mut allocator, klvm_rs_value, &mut result_stream);
+    sexp_to_stream(&mut allocator, clvk_rs_value, &mut result_stream);
     JsValue::from_str(&result_stream.get_value().hex())
 }
 
@@ -470,7 +470,7 @@ pub fn repl_run_string(repl_id: i32, input: String) -> JsValue {
             }
         })
         .map(|v| v.map(|v| js_object_from_sexp(v.to_sexp()).unwrap_or_else(|e| e)))
-        .unwrap_or_else(|e| Some(create_klvm_runner_err(format!("{}: {}", e.0, e.1))))
+        .unwrap_or_else(|e| Some(create_clvk_runner_err(format!("{}: {}", e.0, e.1))))
         .unwrap_or_else(JsValue::null)
 }
 
@@ -480,7 +480,7 @@ pub fn sexp_to_string(v: &JsValue) -> JsValue {
 
     sexp_from_js_object(loc, v)
         .map(|s| JsValue::from_str(&s.to_string()))
-        .unwrap_or_else(|| create_klvm_runner_err("unable to convert to value".to_string()))
+        .unwrap_or_else(|| create_clvk_runner_err("unable to convert to value".to_string()))
 }
 
 #[wasm_bindgen]

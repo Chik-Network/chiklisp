@@ -1,7 +1,7 @@
 mod bitconst;
 mod bls;
+mod clvkc;
 mod embed;
-mod klvmc;
 mod optimize;
 pub mod run;
 mod smoke;

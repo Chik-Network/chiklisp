@@ -3,21 +3,21 @@ use std::collections::{BTreeMap, HashMap};
 use std::mem::swap;
 use std::rc::Rc;
 
-use klvm_rs::allocator;
-use klvm_rs::allocator::{Allocator, NodePtr};
-use klvm_rs::error::EvalErr;
+use clvk_rs::allocator;
+use clvk_rs::allocator::{Allocator, NodePtr};
+use clvk_rs::error::EvalErr;
 use num_bigint::ToBigInt;
 
-use crate::classic::klvm::__type_compatibility__::{
+use crate::classic::clvk::__type_compatibility__::{
     Bytes, BytesFromType, Stream, UnvalidatedBytesFromType,
 };
-use crate::classic::klvm::serialize::{sexp_from_stream, SimpleCreateKLVMObject};
-//use crate::classic::klvm::syntax_error::SyntaxErr;
-use crate::classic::klvm_tools::sha256tree::sha256tree;
-use crate::classic::klvm_tools::stages::stage_0::TRunProgram;
+use crate::classic::clvk::serialize::{sexp_from_stream, SimpleCreateCLVKObject};
+//use crate::classic::clvk::syntax_error::SyntaxErr;
+use crate::classic::clvk_tools::sha256tree::sha256tree;
+use crate::classic::clvk_tools::stages::stage_0::TRunProgram;
 
-use crate::compiler::klvm;
-use crate::compiler::klvm::{convert_from_klvm_rs, run_step, RunStep};
+use crate::compiler::clvk;
+use crate::compiler::clvk::{convert_from_clvk_rs, run_step, RunStep};
 use crate::compiler::runtypes::RunFailure;
 use crate::compiler::sexp::SExp;
 use crate::compiler::srcloc::Srcloc;
@@ -72,7 +72,7 @@ pub trait CldbRunnable {
     fn replace_step(&self, step: &RunStep) -> Option<Result<RunStep, RunFailure>>;
 }
 
-/// A CldbEnvironment is a container for a function-oriented view of klvm programs
+/// A CldbEnvironment is a container for a function-oriented view of clvk programs
 /// when running in Cldb.
 pub trait CldbEnvironment {
     fn add_context(
@@ -86,8 +86,8 @@ pub trait CldbEnvironment {
     fn get_override(&self, s: &RunStep) -> Option<Result<RunStep, RunFailure>>;
 }
 
-/// CldbRun is the main object used to run KLVM code in a stepwise way.  The main
-/// advantage of CldbRun over klvmr's runner is that the caller observes a new
+/// CldbRun is the main object used to run CLVK code in a stepwise way.  The main
+/// advantage of CldbRun over clvkr's runner is that the caller observes a new
 /// step being returned after it asks for each step to be run.  The progress of
 /// evaulation is observable and hopefully understandable and in an order which,
 /// combined with observing the RunStep can help with debugging.
@@ -393,16 +393,16 @@ pub trait CldbSingleBespokeOverride {
 
 /// Provides a collection of overrides to be used with CldbEnvironment and
 /// CldbRun to support use cases like examining the arguments given to a
-/// specific function while KLVM code is executing or to mock functions in
-/// a KLVM program.
+/// specific function while CLVK code is executing or to mock functions in
+/// a CLVK program.
 pub struct CldbOverrideBespokeCode {
     symbol_table: HashMap<String, String>,
     overrides: HashMap<String, Box<dyn CldbSingleBespokeOverride>>,
 }
 
 impl CldbOverrideBespokeCode {
-    /// Given the symbol table of a compiled KLVM program and a hashmap from
-    /// function names to override specifications, provie a KlvmEnvironment that
+    /// Given the symbol table of a compiled CLVK program and a hashmap from
+    /// function names to override specifications, provie a ClvkEnvironment that
     /// overrides the targeted functions with the given overrides, which are
     /// objects the consumer implements CldbSingleBespokeOverride for.
     ///
@@ -426,7 +426,7 @@ impl CldbOverrideBespokeCode {
         args: Rc<SExp>,
         p: Rc<RunStep>,
     ) -> Option<Result<RunStep, RunFailure>> {
-        let fun_hash = klvm::sha256tree(f);
+        let fun_hash = clvk::sha256tree(f);
         let fun_hash_str = Bytes::new(Some(BytesFromType::Raw(fun_hash))).hex();
 
         self.symbol_table
@@ -608,8 +608,8 @@ fn hex_to_modern_sexp_inner(
             hex_to_modern_sexp_inner(allocator, symbol_table, srcloc.clone(), a)?,
             hex_to_modern_sexp_inner(allocator, symbol_table, srcloc, b)?,
         ))),
-        _ => convert_from_klvm_rs(allocator, srcloc, program).map_err(|_| {
-            EvalErr::InternalError(NodePtr::NIL, "klvm_rs allocator failed".to_string())
+        _ => convert_from_clvk_rs(allocator, srcloc, program).map_err(|_| {
+            EvalErr::InternalError(NodePtr::NIL, "clvk_rs allocator failed".to_string())
         }),
     }
 }
@@ -628,7 +628,7 @@ pub fn hex_to_modern_sexp(
     .map_err(|e| RunFailure::RunErr(loc.clone(), e.to_string()))?;
 
     let mut stream = Stream::new(Some(input_serialized));
-    let sexp = sexp_from_stream(allocator, &mut stream, Box::new(SimpleCreateKLVMObject {}))
+    let sexp = sexp_from_stream(allocator, &mut stream, Box::new(SimpleCreateCLVKObject {}))
         .map(|x| x.1)
         .map_err(|_| RunFailure::RunErr(loc.clone(), "Bad conversion from hex".to_string()))?;
 

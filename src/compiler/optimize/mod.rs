@@ -7,7 +7,7 @@ pub mod depgraph;
 pub mod double_apply;
 pub mod strategy;
 
-use klvm_rs::error::EvalErr;
+use clvk_rs::error::EvalErr;
 #[cfg(test)]
 use num_bigint::ToBigInt;
 
@@ -15,15 +15,16 @@ use std::borrow::Borrow;
 use std::collections::{HashMap, HashSet};
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
 #[cfg(test)]
-use crate::classic::klvm::__type_compatibility__::bi_one;
-use crate::classic::klvm::__type_compatibility__::bi_zero;
+use crate::classic::clvk::__type_compatibility__::bi_one;
+use crate::classic::clvk::__type_compatibility__::bi_zero;
 
-use crate::classic::klvm_tools::stages::stage_0::TRunProgram;
-use crate::classic::klvm_tools::stages::stage_2::optimize::optimize_sexp;
+use crate::classic::clvk_tools::stages::stage_0::TRunProgram;
+use crate::classic::clvk_tools::stages::stage_2::optimize::optimize_sexp;
 
+use crate::compiler::clvk::{convert_from_clvk_rs, convert_to_clvk_rs, run};
 use crate::compiler::codegen::{codegen, do_mod_codegen, get_callable};
 use crate::compiler::comptypes::{
     BodyForm, CallSpec, Callable, CompileErr, CompileForm, CompilerOpts, DefunData, HelperForm,
@@ -33,7 +34,6 @@ use crate::compiler::dialect::{MAX_STEPPING, OPT_STRATEGY_BASE_STEPPING};
 use crate::compiler::evaluate::{
     build_reflex_captures, dequote, is_i_atom, is_not_atom, Evaluator, EVAL_STACK_LIMIT,
 };
-use crate::compiler::klvm::{convert_from_klvm_rs, convert_to_klvm_rs, run};
 use crate::compiler::optimize::above22::Strategy23;
 use crate::compiler::optimize::depgraph::{DepgraphOptions, FunctionDependencyGraph};
 use crate::compiler::optimize::strategy::ExistingStrategy;
@@ -692,26 +692,26 @@ pub fn run_optimizer(
     runner: Rc<dyn TRunProgram>,
     r: Rc<SExp>,
 ) -> Result<Rc<SExp>, CompileErr> {
-    let to_klvm_rs = convert_to_klvm_rs(allocator, r.clone())
+    let to_clvk_rs = convert_to_clvk_rs(allocator, r.clone())
         .map(|x| (r.loc(), x))
         .map_err(|e| match e {
             RunFailure::RunErr(l, e) => CompileErr(l, e),
             RunFailure::RunExn(s, e) => CompileErr(s, format!("exception {e}\n")),
         })?;
 
-    let optimized = optimize_sexp(allocator, to_klvm_rs.1, runner)
+    let optimized = optimize_sexp(allocator, to_clvk_rs.1, runner)
         .map_err(|e| {
             CompileErr(
-                to_klvm_rs.0.clone(),
+                to_clvk_rs.0.clone(),
                 match e {
                     EvalErr::InternalError(_, e) => e.to_string(),
                     _ => e.to_string(),
                 },
             )
         })
-        .map(|x| (to_klvm_rs.0, x))?;
+        .map(|x| (to_clvk_rs.0, x))?;
 
-    convert_from_klvm_rs(allocator, optimized.0, optimized.1).map_err(|e| match e {
+    convert_from_clvk_rs(allocator, optimized.0, optimized.1).map_err(|e| match e {
         RunFailure::RunErr(l, e) => CompileErr(l, e),
         RunFailure::RunExn(s, e) => CompileErr(s, format!("exception {e}\n")),
     })

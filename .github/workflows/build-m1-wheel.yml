@@ -75,28 +75,28 @@ jobs:
         python -m pip install pytest
         python -m pip install blspy
 
-    - name: install klvm & klvm_tools
+    - name: install clvk & clvk_tools
       run: |
         . ./venv/bin/activate
-        git clone https://github.com/Chik-Network/klvm.git --branch=main --single-branch
-        python -m pip install ./klvm
-        python -m pip install klvm_rs
+        git clone https://github.com/Chik-Network/clvk.git --branch=main --single-branch
+        python -m pip install ./clvk
+        python -m pip install clvk_rs
 
-        git clone https://github.com/Chik-Network/klvm_tools.git --branch=main --single-branch
-        python -m pip install ./klvm_tools
+        git clone https://github.com/Chik-Network/clvk_tools.git --branch=main --single-branch
+        python -m pip install ./clvk_tools
 
-        # Install chiklisp pkg as "klvm_tools_rs" for older test framework
+        # Install chiklisp pkg as "clvk_tools_rs" for older test framework
         pip install -e ./tmp
 
-    - name: Ensure klvm, klvm_rs, klvm_tools are installed
+    - name: Ensure clvk, clvk_rs, clvk_tools are installed
       run: |
         . ./venv/bin/activate
-        python -c 'import klvm'
-        python -c 'import klvm; print(klvm.__file__)'
-        python -c 'import klvm_rs; print(klvm_rs.__file__)'
-        python -c 'import klvm_tools; print(klvm_tools.__file__)'
+        python -c 'import clvk'
+        python -c 'import clvk; print(clvk.__file__)'
+        python -c 'import clvk_rs; print(clvk_rs.__file__)'
+        python -c 'import clvk_tools; print(clvk_tools.__file__)'
         python -c 'import chiklisp; print(chiklisp.__file__)'
-        python -c 'import klvm_tools_rs; print(klvm_tools_rs.__file__)'
+        python -c 'import clvk_tools_rs; print(clvk_tools_rs.__file__)'
 
     - name: Install pytest
       run: |
@@ -104,16 +104,16 @@ jobs:
         pip install pytest pytest-asyncio
 
 # Cost tests are currently failing.
-#    - name: Run tests from klvm
+#    - name: Run tests from clvk
 #      run: |
 #        . ./venv/bin/activate
-#        cd klvm
+#        cd clvk
 #        python -m py.test tests
 
-    - name: Run tests from klvm_tools
+    - name: Run tests from clvk_tools
       run: |
         . ./venv/bin/activate
-        cd klvm_tools
+        cd clvk_tools
         pytest
 
     - name: Upload wheels
@@ -189,5 +189,5 @@ jobs:
         FILES=$(find . -type f -name '*.whl')
         while IFS= read -r file; do
           filename=$(basename $file)
-          aws --no-progress s3 cp "$file" "s3://download.chiknetwork.com/simple-dev/klvm-tools-rs/$filename"
+          aws --no-progress s3 cp "$file" "s3://download.chiknetwork.com/simple-dev/clvk-tools-rs/$filename"
         done <<< "$FILES"

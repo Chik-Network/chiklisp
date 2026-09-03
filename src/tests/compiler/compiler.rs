@@ -1,16 +1,16 @@
 use std::collections::{BTreeSet, HashMap};
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
-use crate::classic::klvm::__type_compatibility__::bi_one;
-use crate::classic::klvm_tools::binutils::disassemble;
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk::__type_compatibility__::bi_one;
+use crate::classic::clvk_tools::binutils::disassemble;
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
+use crate::compiler::clvk::run;
 use crate::compiler::compiler::{compile_file, DefaultCompilerOpts};
 use crate::compiler::comptypes::{CompileErr, CompilerOpts};
 use crate::compiler::dialect::{AcceptedDialect, KNOWN_DIALECTS};
 use crate::compiler::frontend::{collect_used_names_sexp, frontend};
-use crate::compiler::klvm::run;
 use crate::compiler::optimize::get_optimizer;
 use crate::compiler::rename::rename_in_cons;
 use crate::compiler::runtypes::RunFailure;
@@ -1138,7 +1138,7 @@ fn sebastian_hash_test_1() {
     let result = run_string(
         &indoc! {"
 (mod (MOD_HASH TOKEN_A_AMOUNT TOKEN_B_AMOUNT K token_a_delta token_b_delta)
-    (include \"condition_codes.klvm\")
+    (include \"condition_codes.clvk\")
     (include \"curry-and-treehash.clinc\")
     (include *standard-cl-21*)
 
@@ -1182,7 +1182,7 @@ fn sebastian_hash_test_2() {
     let result = run_string(
         &indoc! {"
 (mod (MOD_HASH TOKEN_A_AMOUNT TOKEN_B_AMOUNT K token_a_delta token_b_delta)
-    (include \"condition_codes.klvm\")
+    (include \"condition_codes.clvk\")
     (include \"curry-and-treehash.clinc\")
 
     (defun sha256tree1 (TREE)
@@ -1242,7 +1242,7 @@ fn test_modern_inline_at_capture() {
     )
     .unwrap_err();
 
-    assert_eq!(result.1, "klvm raise in (8 5) (() 99)");
+    assert_eq!(result.1, "clvk raise in (8 5) (() 99)");
 }
 
 #[test]

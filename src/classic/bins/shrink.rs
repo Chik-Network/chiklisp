@@ -1,10 +1,10 @@
-extern crate klvmr as klvm_rs;
+extern crate clvkr as clvk_rs;
 
 use std::collections::HashMap;
 use std::env;
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
 use chiklisp::compiler::compiler::DefaultCompilerOpts;
 use chiklisp::compiler::evaluate::{Evaluator, EVAL_STACK_LIMIT};
@@ -14,7 +14,7 @@ use chiklisp::compiler::sexp::parse_sexp;
 use chiklisp::compiler::srcloc::Srcloc;
 use chiklisp::compiler::BasicCompileContext;
 
-use chiklisp::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use chiklisp::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 use chiklisp::util::ErrInto;
 
 fn main() {

@@ -28,13 +28,13 @@
 ## 0.1.32
 Skipped
 
-## 0.1.31 Chik KLVM Tools Rust 2023-04-17
+## 0.1.31 Chik CLVK Tools Rust 2023-04-17
 
 ### Added
 
 - defconst was added.
 - hierarchikl debug was added.
-- klvm command linetools: supported more command line features in both compiler front-ends.
+- clvk command linetools: supported more command line features in both compiler front-ends.
 
 ## 0.1.35 
 

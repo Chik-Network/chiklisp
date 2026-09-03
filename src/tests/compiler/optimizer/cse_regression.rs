@@ -3,9 +3,9 @@ use rand_chacha::ChaCha8Rng;
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::rc::Rc;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 use crate::compiler::compiler::{DefaultCompilerOpts, FUZZ_TEST_PRE_CSE_MERGE_FIX_FLAG};
 use crate::compiler::comptypes::{BodyForm, CompileForm, CompilerOpts, DefunData, HelperForm};
 use crate::compiler::dialect::AcceptedDialect;

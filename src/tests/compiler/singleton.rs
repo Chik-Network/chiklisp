@@ -1,14 +1,14 @@
 use sha2::{Digest, Sha256};
 use std::rc::Rc;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 
 use num_bigint::ToBigInt;
 
-use crate::classic::klvm::__type_compatibility__::{bi_one, Bytes, BytesFromType, Stream};
-use crate::classic::klvm::serialize::{sexp_from_stream, SimpleCreateKLVMObject};
-use crate::classic::klvm_tools::binutils::disassemble;
-use crate::compiler::klvm::sha256tree;
+use crate::classic::clvk::__type_compatibility__::{bi_one, Bytes, BytesFromType, Stream};
+use crate::classic::clvk::serialize::{sexp_from_stream, SimpleCreateCLVKObject};
+use crate::classic::clvk_tools::binutils::disassemble;
+use crate::compiler::clvk::sha256tree;
 use crate::compiler::prims::{primapply, primcons, primquote};
 use crate::compiler::sexp::{enlist, parse_sexp, SExp};
 use crate::compiler::srcloc::Srcloc;
@@ -45,7 +45,7 @@ lazy_static! {
         let code = sexp_from_stream(
             &mut allocator,
             &mut stream,
-            Box::new(SimpleCreateKLVMObject {}),
+            Box::new(SimpleCreateCLVKObject {}),
         )
         .expect("should be able to parse binary");
         disassemble(&mut allocator, code.1, Some(0))

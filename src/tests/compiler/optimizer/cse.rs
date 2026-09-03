@@ -6,16 +6,16 @@ use std::borrow::Borrow;
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::rc::Rc;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 
-use crate::classic::klvm::__type_compatibility__::bi_one;
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk::__type_compatibility__::bi_one;
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 
+use crate::compiler::clvk::run;
 use crate::compiler::compiler::{compile_from_compileform, DefaultCompilerOpts};
 use crate::compiler::comptypes::{BodyForm, CompileForm, CompilerOpts, DefunData, HelperForm};
 use crate::compiler::dialect::AcceptedDialect;
 use crate::compiler::frontend::compile_bodyform;
-use crate::compiler::klvm::run;
 use crate::compiler::optimize::cse::cse_optimize_bodyform;
 use crate::compiler::optimize::get_optimizer;
 use crate::compiler::sexp::{enlist, parse_sexp, SExp};
@@ -23,7 +23,7 @@ use crate::compiler::srcloc::Srcloc;
 use crate::compiler::CompileContextWrapper;
 
 use crate::tests::classic::run::{do_basic_brun, do_basic_run};
-use crate::tests::compiler::klvm::TEST_TIMEOUT;
+use crate::tests::compiler::clvk::TEST_TIMEOUT;
 use crate::tests::util::RngLFSR;
 
 #[test]
@@ -950,7 +950,7 @@ fn test_generated_cse(n: u32) {
     eprintln!("tree       {tree}");
 
     let mut allocator = Allocator::new();
-    let klvm21 = run(
+    let clvk21 = run(
         &mut allocator,
         runner.clone(),
         opts.prim_map(),
@@ -959,7 +959,7 @@ fn test_generated_cse(n: u32) {
         None,
         Some(TEST_TIMEOUT),
     );
-    let klvm23 = run(
+    let clvk23 = run(
         &mut allocator,
         runner,
         opts.prim_map(),
@@ -968,19 +968,19 @@ fn test_generated_cse(n: u32) {
         None,
         Some(TEST_TIMEOUT),
     );
-    if let Ok(res21) = klvm21.as_ref() {
+    if let Ok(res21) = clvk21.as_ref() {
         eprintln!("cl21 {res21}");
     }
-    if let Ok(res23) = klvm23.as_ref() {
+    if let Ok(res23) = clvk23.as_ref() {
         eprintln!("cl23 {res23}");
     }
-    if klvm21.is_err() || klvm23.is_err() {
+    if clvk21.is_err() || clvk23.is_err() {
         // Precise errors might change due to differences in ordering and
         // locations and such.
-        assert_eq!(klvm21.is_err(), klvm23.is_err());
+        assert_eq!(clvk21.is_err(), clvk23.is_err());
         return;
     }
-    assert_eq!(klvm21, klvm23);
+    assert_eq!(clvk21, clvk23);
 }
 
 #[test]

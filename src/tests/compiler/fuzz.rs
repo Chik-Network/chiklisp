@@ -9,14 +9,14 @@ use std::collections::{BTreeSet, HashMap};
 use std::fmt::{Debug, Display};
 use std::rc::Rc;
 
-use klvmr::Allocator;
+use clvkr::Allocator;
 
-use crate::classic::klvm_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use crate::classic::clvk_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
+use crate::compiler::clvk::{convert_to_clvk_rs, run};
 use crate::compiler::compiler::{compile_file, DefaultCompilerOpts};
 use crate::compiler::comptypes::{BodyForm, CompileErr, CompilerOpts, HasCompilerOptsDelegation};
 use crate::compiler::dialect::detect_modern;
 use crate::compiler::fuzz::{ExprModifier, FuzzChoice, FuzzGenerator, FuzzTypeParams, Rule};
-use crate::compiler::klvm::{convert_to_klvm_rs, run};
 use crate::compiler::prims::primquote;
 use crate::compiler::sexp::{enlist, extract_atom_replacement, parse_sexp, SExp};
 use crate::compiler::srcloc::Srcloc;
@@ -84,7 +84,7 @@ pub fn perform_compile_of_file(
     let loc = Srcloc::start(filename);
     let parsed: Vec<Rc<SExp>> = parse_sexp(loc.clone(), content.bytes()).expect("should parse");
     let listed = Rc::new(enlist(loc.clone(), &parsed));
-    let nodeptr = convert_to_klvm_rs(allocator, listed.clone()).expect("should convert");
+    let nodeptr = convert_to_clvk_rs(allocator, listed.clone()).expect("should convert");
     let dialect = detect_modern(allocator, nodeptr);
     let orig_opts: Rc<dyn CompilerOpts> = Rc::new(DefaultCompilerOpts::new(filename))
         .set_optimize(true)
@@ -275,7 +275,7 @@ impl Distribution<SupportedOperators> for StandardUniform {
 pub enum ValueSpecification {
     ConstantValue(Rc<SExp>),
     VarRef(Vec<u8>),
-    KlvmBinop(
+    ClvkBinop(
         SupportedOperators,
         Rc<ValueSpecification>,
         Rc<ValueSpecification>,
@@ -294,7 +294,7 @@ impl ValueSpecification {
                 c_borrowed.clone()
             }
             ValueSpecification::VarRef(c) => SExp::Atom(srcloc.clone(), c.clone()),
-            ValueSpecification::KlvmBinop(op, left, right) => enlist(
+            ValueSpecification::ClvkBinop(op, left, right) => enlist(
                 srcloc.clone(),
                 &[
                     Rc::new(op.to_sexp(srcloc)),
@@ -307,7 +307,7 @@ impl ValueSpecification {
 
     pub fn to_bodyform(&self, srcloc: &Srcloc) -> BodyForm {
         match self {
-            ValueSpecification::KlvmBinop(op, left, right) => BodyForm::Call(
+            ValueSpecification::ClvkBinop(op, left, right) => BodyForm::Call(
                 srcloc.clone(),
                 vec![
                     Rc::new(op.to_bodyform(srcloc)),
@@ -335,7 +335,7 @@ impl ValueSpecification {
                 ValueSpecification::VarRef(c) => {
                     result.insert(c.clone());
                 }
-                ValueSpecification::KlvmBinop(_, l, r) => {
+                ValueSpecification::ClvkBinop(_, l, r) => {
                     stack.push(l.clone());
                     stack.push(r.clone());
                 }
@@ -361,7 +361,7 @@ impl ValueSpecification {
                     todo!();
                 }
             }
-            ValueSpecification::KlvmBinop(op, left, right) => {
+            ValueSpecification::ClvkBinop(op, left, right) => {
                 let operator = op.to_sexp(srcloc);
                 let left_val = left.interpret(opts.clone(), srcloc, value_map);
                 let right_val = right.interpret(opts.clone(), srcloc, value_map);
@@ -394,7 +394,7 @@ fn find_in_structure_inner(
     structure: Rc<ValueSpecification>,
     target: &Rc<ValueSpecification>,
 ) -> bool {
-    if let ValueSpecification::KlvmBinop(_, l, r) = structure.borrow() {
+    if let ValueSpecification::ClvkBinop(_, l, r) = structure.borrow() {
         parents.push(structure.clone());
         if find_in_structure_inner(parents, l.clone(), target) {
             return true;
@@ -426,7 +426,7 @@ impl ExprModifier for Rc<ValueSpecification> {
                     }
                 }
             }
-            ValueSpecification::KlvmBinop(_, l, r) => {
+            ValueSpecification::ClvkBinop(_, l, r) => {
                 l.find_waiters(waiters);
                 r.find_waiters(waiters);
             }
@@ -436,11 +436,11 @@ impl ExprModifier for Rc<ValueSpecification> {
 
     /// Replace a value where it appears in the structure with a new value.
     fn replace_node(&self, to_replace: &Self::Expr, new_value: Self::Expr) -> Self::Expr {
-        if let ValueSpecification::KlvmBinop(op, l, r) = self.borrow() {
+        if let ValueSpecification::ClvkBinop(op, l, r) = self.borrow() {
             let new_l = l.replace_node(to_replace, new_value.clone());
             let new_r = r.replace_node(to_replace, new_value.clone());
             if Rc::as_ptr(&new_l) != Rc::as_ptr(l) || Rc::as_ptr(&new_r) != Rc::as_ptr(r) {
-                return Rc::new(ValueSpecification::KlvmBinop(op.clone(), new_l, new_r));
+                return Rc::new(ValueSpecification::ClvkBinop(op.clone(), new_l, new_r));
             }
         }
 
@@ -525,7 +525,7 @@ impl Rule<SimpleFuzzItselfTest> for SimpleRuleOp {
         let l = format!("${{{idx}:expand}}").as_bytes().to_vec();
         let r = format!("${{{}:expand}}", idx + 1).as_bytes().to_vec();
 
-        Ok(Some(Rc::new(ValueSpecification::KlvmBinop(
+        Ok(Some(Rc::new(ValueSpecification::ClvkBinop(
             self.op.clone(),
             Rc::new(ValueSpecification::VarRef(l)),
             Rc::new(ValueSpecification::VarRef(r)),

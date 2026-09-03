@@ -1,11 +1,11 @@
-extern crate klvmr as klvm_rs;
+extern crate clvkr as clvk_rs;
 
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 
 use std::rc::Rc;
 
-use klvm_rs::allocator::Allocator;
+use clvk_rs::allocator::Allocator;
 
 use chiklisp::compiler::compiler::DefaultCompilerOpts;
 use chiklisp::compiler::optimize::get_optimizer;
@@ -13,7 +13,7 @@ use chiklisp::compiler::repl::Repl;
 use chiklisp::compiler::srcloc::Srcloc;
 use chiklisp::compiler::BasicCompileContext;
 
-use chiklisp::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use chiklisp::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 
 fn main() {
     let opts = Rc::new(DefaultCompilerOpts::new("*program*"));

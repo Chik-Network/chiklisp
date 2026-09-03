@@ -1,6 +1,6 @@
 #![allow(clippy::all)]
 // #[allow(clippy::borrow_deref_ref)]
-// Eventually this can be downgraded and applied just to compile_klvm
+// Eventually this can be downgraded and applied just to compile_clvk
 // re: https://github.com/rust-lang/rust-clippy/issues/8971
 use pyo3::exceptions::PyException;
 use pyo3::types::{PyBool, PyDict, PyString, PyTuple};
@@ -15,25 +15,25 @@ use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::thread;
 
-use klvm_rs::allocator::Allocator;
-use klvm_rs::error::EvalErr;
-use klvm_rs::serde::node_to_bytes;
+use clvk_rs::allocator::Allocator;
+use clvk_rs::error::EvalErr;
+use clvk_rs::serde::node_to_bytes;
 
-use crate::classic::klvm::__type_compatibility__::{
+use crate::classic::clvk::__type_compatibility__::{
     Bytes, BytesFromType, Stream, UnvalidatedBytesFromType,
 };
-use crate::classic::klvm::serialize::sexp_to_stream;
-use crate::classic::klvm_tools::cmds;
-use crate::classic::klvm_tools::klvmc;
-use crate::classic::klvm_tools::stages::stage_0::DefaultProgramRunner;
+use crate::classic::clvk::serialize::sexp_to_stream;
+use crate::classic::clvk_tools::clvkc;
+use crate::classic::clvk_tools::cmds;
+use crate::classic::clvk_tools::stages::stage_0::DefaultProgramRunner;
 use crate::compiler::cldb::{
     hex_to_modern_sexp, CldbOverrideBespokeCode, CldbRun, CldbRunEnv, CldbSingleBespokeOverride,
 };
+use crate::compiler::clvk::{convert_to_clvk_rs, start_step};
 use crate::compiler::compiler::{
     extract_program_and_env, path_to_function, rewrite_in_program, DefaultCompilerOpts,
 };
 use crate::compiler::comptypes::{CompileErr, CompilerOpts};
-use crate::compiler::klvm::{convert_to_klvm_rs, start_step};
 use crate::compiler::preprocessor::gather_dependencies;
 use crate::compiler::prims;
 use crate::compiler::runtypes::RunFailure;
@@ -42,7 +42,7 @@ use crate::compiler::srcloc::Srcloc;
 
 use crate::util::{gentle_overwrite, version};
 
-use crate::py::pyval::{klvm_value_to_python, python_value_to_klvm};
+use crate::py::pyval::{clvk_value_to_python, python_value_to_clvk};
 
 use super::binutils::create_binutils_module;
 use super::cmds::create_cmds_module;
@@ -56,19 +56,19 @@ fn get_version() -> PyResult<String> {
     Ok(version())
 }
 
-enum CompileKlvmSource<'a> {
+enum CompileClvkSource<'a> {
     SourcePath(Bound<'a, PyAny>),
     SourceCode(String, String),
 }
 
-enum CompileKlvmAction {
+enum CompileClvkAction {
     CheckDependencies,
     CompileCode(Option<String>),
 }
 
-fn get_source_from_input(input_code: CompileKlvmSource) -> PyResult<(String, String)> {
+fn get_source_from_input(input_code: CompileClvkSource) -> PyResult<(String, String)> {
     match input_code {
-        CompileKlvmSource::SourcePath(input_path) => {
+        CompileClvkSource::SourcePath(input_path) => {
             let has_atom = input_path.hasattr("atom")?;
             let has_pair = input_path.hasattr("pair")?;
 
@@ -85,21 +85,21 @@ fn get_source_from_input(input_code: CompileKlvmSource) -> PyResult<(String, Str
 
             let mut path_string = real_input_path.to_string();
 
-            if !std::path::Path::new(&path_string).exists() && !path_string.ends_with(".klvm") {
-                path_string += ".klvm";
+            if !std::path::Path::new(&path_string).exists() && !path_string.ends_with(".clvk") {
+                path_string += ".clvk";
             }
 
             let file_data = fs::read_to_string(&path_string)
                 .map_err(|e| PyException::new_err(format!("error reading {path_string}: {e:?}")))?;
             Ok((path_string, file_data))
         }
-        CompileKlvmSource::SourceCode(name, code) => Ok((name.clone(), code.clone())),
+        CompileClvkSource::SourceCode(name, code) => Ok((name.clone(), code.clone())),
     }
 }
 
-fn run_klvm_compilation(
-    input_code: CompileKlvmSource,
-    action: CompileKlvmAction,
+fn run_clvk_compilation(
+    input_code: CompileClvkSource,
+    action: CompileClvkAction,
     search_paths: Vec<String>,
     export_symbols: Option<bool>,
 ) -> PyResult<Py<PyAny>> {
@@ -111,12 +111,12 @@ fn run_klvm_compilation(
     let opts = def_opts.set_search_paths(&search_paths);
 
     match action {
-        CompileKlvmAction::CompileCode(output) => {
+        CompileClvkAction::CompileCode(output) => {
             let mut allocator = Allocator::new();
             let mut symbols = HashMap::new();
 
-            // Output is a program represented as klvm data in allocator.
-            let klvm_result = klvmc::compile_klvm_text(
+            // Output is a program represented as clvk data in allocator.
+            let clvk_result = clvkc::compile_clvk_text(
                 &mut allocator,
                 opts.clone(),
                 &mut symbols,
@@ -129,7 +129,7 @@ fn run_klvm_compilation(
             // Get the text representation, which will go either to the output file
             // or result.
             let mut hex_text = Bytes::new(Some(BytesFromType::Raw(
-                node_to_bytes(&allocator, klvm_result).map_err(|err| {
+                node_to_bytes(&allocator, clvk_result).map_err(|err| {
                     PyException::new_err(match err {
                         EvalErr::InternalError(_, e) => e.to_string(),
                         _ => err.to_string(),
@@ -160,7 +160,7 @@ fn run_klvm_compilation(
                 }
             })
         }
-        CompileKlvmAction::CheckDependencies => {
+        CompileClvkAction::CheckDependencies => {
             // Produce dependency results.
             let result_deps: Vec<String> =
                 gather_dependencies(opts, &path_string.to_string(), &file_content)
@@ -175,15 +175,15 @@ fn run_klvm_compilation(
 
 #[pyfunction]
 #[pyo3(signature = (input_path, output_path, search_paths = Vec::new(), export_symbols = None))]
-fn compile_klvm(
+fn compile_clvk(
     input_path: Bound<'_, PyAny>,
     output_path: String,
     search_paths: Vec<String>,
     export_symbols: Option<bool>,
 ) -> PyResult<Py<PyAny>> {
-    run_klvm_compilation(
-        CompileKlvmSource::SourcePath(input_path),
-        CompileKlvmAction::CompileCode(Some(output_path)),
+    run_clvk_compilation(
+        CompileClvkSource::SourcePath(input_path),
+        CompileClvkAction::CompileCode(Some(output_path)),
         search_paths,
         export_symbols,
     )
@@ -196,9 +196,9 @@ fn compile(
     search_paths: Vec<String>,
     export_symbols: Option<bool>,
 ) -> PyResult<Py<PyAny>> {
-    run_klvm_compilation(
-        CompileKlvmSource::SourceCode("*inline*".to_string(), source),
-        CompileKlvmAction::CompileCode(None),
+    run_clvk_compilation(
+        CompileClvkSource::SourceCode("*inline*".to_string(), source),
+        CompileClvkAction::CompileCode(None),
         search_paths,
         export_symbols,
     )
@@ -210,9 +210,9 @@ fn check_dependencies(
     input_path: Bound<'_, PyAny>,
     search_paths: Vec<String>,
 ) -> PyResult<Py<PyAny>> {
-    run_klvm_compilation(
-        CompileKlvmSource::SourcePath(input_path),
-        CompileKlvmAction::CheckDependencies,
+    run_clvk_compilation(
+        CompileClvkSource::SourcePath(input_path),
+        CompileClvkAction::CheckDependencies,
         search_paths,
         None,
     )
@@ -291,7 +291,7 @@ impl CldbSinglePythonOverride {
 impl CldbSingleBespokeOverride for CldbSinglePythonOverride {
     fn get_override(&self, env: Rc<SExp>) -> Result<Rc<SExp>, RunFailure> {
         Python::attach(|py| {
-            let arg_value = klvm_value_to_python(py, env.clone())
+            let arg_value = clvk_value_to_python(py, env.clone())
                 .map_err(|e| RunFailure::RunErr(env.loc(), format!("{}", e)))?;
             let res = self
                 .pycode
@@ -301,14 +301,14 @@ impl CldbSingleBespokeOverride for CldbSinglePythonOverride {
                         .map_err(|e| RunFailure::RunErr(env.loc(), format!("{}", e)))?,
                 )
                 .map_err(|e| RunFailure::RunErr(env.loc(), format!("{}", e)))?;
-            python_value_to_klvm(res.into_bound(py))
+            python_value_to_clvk(res.into_bound(py))
         })
     }
 }
 
 #[pyfunction]
 #[pyo3(signature = (hex_prog, hex_args, symbol_table, overrides=None, run_options=None))]
-fn start_klvm_program(
+fn start_clvk_program(
     hex_prog: String,
     hex_args: String,
     symbol_table: Option<HashMap<String, String>>,
@@ -500,9 +500,9 @@ pub fn compose_run_function(
 
     let new_program = rewrite_in_program(function_path, main_env.1);
     let mut result_stream = Stream::new(None);
-    let klvm_rs_value =
-        convert_to_klvm_rs(&mut allocator, new_program).map_err(run_err_to_cldb_err)?;
-    sexp_to_stream(&mut allocator, klvm_rs_value, &mut result_stream);
+    let clvk_rs_value =
+        convert_to_clvk_rs(&mut allocator, new_program).map_err(run_err_to_cldb_err)?;
+    sexp_to_stream(&mut allocator, clvk_rs_value, &mut result_stream);
     Ok(result_stream.get_value().hex())
 }
 
@@ -514,10 +514,10 @@ fn _chiklisp(py: Python, m: Bound<'_, PyModule>) -> PyResult<()> {
     m.add("CldbError", py.get_type::<CldbError>())?;
     m.add("CompError", py.get_type::<CompError>())?;
 
-    m.add_function(wrap_pyfunction!(compile_klvm, &m)?)?;
+    m.add_function(wrap_pyfunction!(compile_clvk, &m)?)?;
     m.add_function(wrap_pyfunction!(compile, &m)?)?;
     m.add_function(wrap_pyfunction!(get_version, &m)?)?;
-    m.add_function(wrap_pyfunction!(start_klvm_program, &m)?)?;
+    m.add_function(wrap_pyfunction!(start_clvk_program, &m)?)?;
     m.add_function(wrap_pyfunction!(launch_tool, &m)?)?;
     m.add_function(wrap_pyfunction!(call_tool, &m)?)?;
     m.add_function(wrap_pyfunction!(check_dependencies, &m)?)?;

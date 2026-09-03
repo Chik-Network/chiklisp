@@ -3,18 +3,18 @@ import binascii
 import json
 import os
 from pathlib import Path
-from chiklisp import start_klvm_program, compose_run_function, compile_klvm
-from klvm_tools.binutils import assemble
-from klvm_rs import Program
+from chiklisp import start_clvk_program, compose_run_function, compile_clvk
+from clvk_tools.binutils import assemble
+from clvk_rs import Program
 
 def compile_module_with_symbols(include_paths: List[Path], source: Path):
     path_obj = Path(source)
     file_path = path_obj.parent
     file_stem = path_obj.stem
-    target_file = file_path / (file_stem + ".klvm.hex")
+    target_file = file_path / (file_stem + ".clvk.hex")
     sym_file = file_path / (file_stem + ".sym")
-    # print(f"compile_klvm({path_obj.absolute()}, {str(target_file.absolute().as_posix())}, {include_paths}, True)")
-    compile_result = compile_klvm(
+    # print(f"compile_clvk({path_obj.absolute()}, {str(target_file.absolute().as_posix())}, {include_paths}, True)")
+    compile_result = compile_clvk(
         str(path_obj.resolve()), str(target_file.absolute()), [str(p) for p in include_paths], True
     )
     print(f"Writing to {target_file} {compile_result}")
@@ -37,13 +37,13 @@ def run_until_end(p):
 
     return last
 
-def diag_run_klvm(program, args, symbols, options=None):
+def diag_run_clvk(program, args, symbols, options=None):
     if options is None:
         options = {}
     hex_form_of_program = binascii.hexlify(bytes(program)).decode('utf8')
     hex_form_of_args = binascii.hexlify(bytes(args)).decode('utf8')
     symbols = json.loads(open(symbols).read())
-    p = start_klvm_program(hex_form_of_program, hex_form_of_args, symbols, None, options)
+    p = start_clvk_program(hex_form_of_program, hex_form_of_args, symbols, None, options)
     report = run_until_end(p)
     if 'Failure' in report:
         print(report['Failure'])
@@ -66,4 +66,4 @@ if __name__ == '__main__':
     program = Program.fromhex(open(args.program).read())
     env = Program.fromhex(open(args.env).read())
     options = { 'print': args.print }
-    diag_run_klvm(program, env, args.symbols, options)
+    diag_run_clvk(program, env, args.symbols, options)

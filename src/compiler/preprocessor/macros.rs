@@ -5,10 +5,10 @@ use std::rc::Rc;
 use num_bigint::ToBigInt;
 use num_traits::ToPrimitive;
 
-use crate::classic::klvm::__type_compatibility__::{bi_one, bi_zero};
+use crate::classic::clvk::__type_compatibility__::{bi_one, bi_zero};
 
+use crate::compiler::clvk::PrimOverride;
 use crate::compiler::comptypes::{CompileErr, CompilerOpts};
-use crate::compiler::klvm::PrimOverride;
 use crate::compiler::runtypes::RunFailure;
 use crate::compiler::sexp::{decode_string, printable, SExp};
 use crate::compiler::srcloc::Srcloc;
@@ -304,7 +304,7 @@ impl ExtensionFunction for Substring {
 ///
 /// Enhanced versions of builtin macros:
 ///
-/// if   -- first class short circuiting, no round trip to KLVM space
+/// if   -- first class short circuiting, no round trip to CLVK space
 /// list -- simple own implementation
 /// c    -- cons preserving exact input values
 /// f    -- first and rest exactly preserving part of cons.

@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 use std::fs;
 
-use klvmr::allocator::Allocator;
+use clvkr::allocator::Allocator;
 use toml::{Table, Value};
 
-use chiklisp::classic::klvm_tools::comp_input::RunAndCompileInputData;
-use chiklisp::classic::klvm_tools::klvmc::CompileError;
+use chiklisp::classic::clvk_tools::comp_input::RunAndCompileInputData;
+use chiklisp::classic::clvk_tools::clvkc::CompileError;
 use chiklisp::classic::platform::argparse::ArgumentValue;
 use chiklisp::compiler::comptypes::CompileErr;
 use chiklisp::compiler::srcloc::Srcloc;
