@@ -169,12 +169,12 @@ jobs:
         pip install --no-index --find-links target/wheels/ chiklisp && \
         cd chik_puzzles && \
         pip install click typing_extensions chik_rs clvk chik_puzzles_py) && \
-        pip uninstall -v -y clvk_tools_rs && \
-        pip uninstall -v -y chiklisp && \
-        pip install -v --no-index --find-links target/wheels/ chiklisp && \
-        pip uninstall -v -y clvk_tools_rs && \
-        echo "PWD:" $(pwd) && \
-        pip install -e ./tmp && \
+#        pip uninstall -v -y clvk_tools_rs && \
+#        pip uninstall -v -y chiklisp && \
+#        pip install -v --no-index --find-links target/wheels/ chiklisp && \
+#        pip uninstall -v -y clvk_tools_rs && \
+#        echo "PWD:" $(pwd) && \
+#        pip install -e ./tmp && \
         (cd chik_puzzles && export PYTHONPATH=${PYTHONPATH}:$(pwd) && \
         ./verify_compiler_version.sh ${CLVK_TOOLS_RS_VERSION} && . .venv/bin/activate && \
         echo "Running check" && \
