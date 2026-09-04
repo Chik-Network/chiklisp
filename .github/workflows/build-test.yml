@@ -105,9 +105,9 @@ jobs:
         python -m pip install ./clvk_tools
 
         # Install chiklisp pkg as "clvk_tools_rs" for older test framework
-        pip uninstall -v -y clvk_tools_rs
-        pip install chiklisp
-        pip install -e ./tmp
+#        pip uninstall -v -y clvk_tools_rs
+#        pip install chiklisp
+#        pip install -e ./tmp
 
 
     - name: Ensure clvk, clvk_rs, chiklisp are installed
