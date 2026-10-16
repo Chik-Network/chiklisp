@@ -24,6 +24,9 @@ extern crate tempfile;
 
 extern crate clvkr as clvk_rs;
 
+/// Re-exported so callers can use the same `clvkr` types as chiklisp's API.
+pub use clvkr;
+
 pub mod util;
 
 pub mod classic;

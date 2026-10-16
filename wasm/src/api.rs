@@ -25,11 +25,11 @@ use chiklisp::compiler::cldb::{
     hex_to_modern_sexp, CldbOverrideBespokeCode, CldbRun, CldbRunEnv, CldbRunnable,
     CldbSingleBespokeOverride,
 };
+use chiklisp::compiler::clvk::{convert_to_clvk_rs, start_step};
 use chiklisp::compiler::compiler::{
     extract_program_and_env, path_to_function, rewrite_in_program, DefaultCompilerOpts,
 };
 use chiklisp::compiler::comptypes::{CompileErr, CompilerOpts};
-use chiklisp::compiler::clvk::{convert_to_clvk_rs, start_step};
 use chiklisp::compiler::optimize::get_optimizer;
 use chiklisp::compiler::prims;
 use chiklisp::compiler::repl::Repl;
