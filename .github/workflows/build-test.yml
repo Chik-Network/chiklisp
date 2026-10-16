@@ -230,7 +230,7 @@ jobs:
       run: cargo test -- --include-ignored assign
 
     - name: Check coverage
-      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.12')
+      if: startsWith(matrix.os, 'ubuntu') && startsWith(matrix.python, '3.13')
       run: |
         cargo install grcov
         rustup component add llvm-tools-preview
