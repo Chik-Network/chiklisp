@@ -19,7 +19,7 @@ use crate::jsval::{
 use crate::objects::Program;
 use chiklisp::classic::clvk::__type_compatibility__::{Bytes, Stream, UnvalidatedBytesFromType};
 use chiklisp::classic::clvk::serialize::sexp_to_stream;
-use chiklisp::classic::clvk_tools::clvkc::compile_clvk_inner;
+use chiklisp::classic::clvk_tools::clvkc::{compile_clvk_inner, compiler_opts_for_source};
 use chiklisp::classic::clvk_tools::stages::stage_0::{DefaultProgramRunner, TRunProgram};
 use chiklisp::compiler::cldb::{
     hex_to_modern_sexp, CldbOverrideBespokeCode, CldbRun, CldbRunEnv, CldbRunnable,
@@ -30,6 +30,7 @@ use chiklisp::compiler::compiler::{
     extract_program_and_env, path_to_function, rewrite_in_program, DefaultCompilerOpts,
 };
 use chiklisp::compiler::comptypes::{CompileErr, CompilerOpts};
+use chiklisp::compiler::debug_metadata::compile_with_debug_maybe_opt;
 use chiklisp::compiler::optimize::get_optimizer;
 use chiklisp::compiler::prims;
 use chiklisp::compiler::repl::Repl;
@@ -321,6 +322,80 @@ pub fn compile(input_js: JsValue, filename_js: JsValue, search_paths_js: Vec<JsV
     ) {
         Ok(_) => make_compile_output(&result_stream, &symbol_table),
         Err(e) => create_clvk_runner_err(e),
+    }
+}
+
+/// Compile to exact binary CLVK and canonical structural debug metadata.
+#[wasm_bindgen]
+pub fn compile_debug(
+    input_js: JsValue,
+    filename_js: JsValue,
+    search_paths_js: Vec<JsValue>,
+) -> JsValue {
+    let input = input_js.as_string().unwrap();
+    let filename = filename_js.as_string().unwrap();
+    let search_paths: Vec<String> = search_paths_js
+        .iter()
+        .map(|value| value.as_string().unwrap())
+        .collect();
+    let base_opts = Rc::new(DefaultCompilerOpts::new(&filename)).set_search_paths(&search_paths);
+    let mut allocator = Allocator::new();
+    let opts = match compiler_opts_for_source(&mut allocator, base_opts.clone(), &input, true) {
+        Ok(opts) => opts,
+        Err(error) => return create_clvk_runner_err(error.format(&allocator, base_opts)),
+    };
+    match compile_with_debug_maybe_opt(opts, &input, true) {
+        Err(error) => create_clvk_compile_failure(&error),
+        Ok(artifacts) => {
+            let result = js_sys::Array::new();
+            for (index, artifact) in artifacts.iter().enumerate() {
+                let fields = js_sys::Array::new();
+                fields.set(
+                    0,
+                    js_pair(
+                        JsValue::from_str("exportName"),
+                        artifact
+                            .export_name
+                            .as_deref()
+                            .map(JsValue::from_str)
+                            .unwrap_or(JsValue::NULL),
+                    ),
+                );
+                fields.set(
+                    1,
+                    js_pair(
+                        JsValue::from_str("program"),
+                        js_sys::Uint8Array::from(artifact.program.as_slice()).into(),
+                    ),
+                );
+                fields.set(
+                    2,
+                    js_pair(
+                        JsValue::from_str("debug"),
+                        js_sys::Uint8Array::from(artifact.metadata.as_slice()).into(),
+                    ),
+                );
+                let symbol_entries = js_sys::Array::new();
+                for (symbol_index, (key, value)) in artifact.symbols.iter().enumerate() {
+                    symbol_entries.set(
+                        symbol_index as u32,
+                        js_pair(JsValue::from_str(key), JsValue::from_str(value)),
+                    );
+                }
+                fields.set(
+                    3,
+                    js_pair(
+                        JsValue::from_str("symbols"),
+                        object_to_value(&js_sys::Object::from_entries(&symbol_entries).unwrap()),
+                    ),
+                );
+                result.set(
+                    index as u32,
+                    object_to_value(&js_sys::Object::from_entries(&fields).unwrap()),
+                );
+            }
+            result.into()
+        }
     }
 }
 

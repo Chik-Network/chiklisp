@@ -8,7 +8,7 @@ fi
 REF_SUBDIR="$1"
 
 python -m pip install --upgrade pip
-python -m pip install chik_rs==0.2.5
+python -m pip install "chik_rs>=0.50.0,<0.51"
 python -m pip install clvk_tools
 python -m pip install pytest
 

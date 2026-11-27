@@ -3,7 +3,7 @@ name: QEMU Build and test riscv64 crate
 on:
   push:
     branches:
-      - main1
+      - main
       - dev
     tags:
         - '**'
@@ -67,7 +67,7 @@ jobs:
           -v ${{ github.workspace }}:/ws --workdir=/ws \
           chiknetwork/ubuntu-22.04-risc-builder:latest \
           bash -exc '\
-          pyenv global 3.10
+          pyenv global 3.11
           python -m venv venv && \
           source ./venv/bin/activate && \
           pip install --upgrade pip && \

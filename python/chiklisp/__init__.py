@@ -1,4 +1,5 @@
 import sys
+from typing import TypedDict
 
 from chiklisp._chiklisp import (
     CldbError,
@@ -9,6 +10,7 @@ from chiklisp._chiklisp import (
     check_dependencies,
     compile,
     compile_clvk,
+    compile_debug,
     compose_run_function,
     get_version,
     launch_tool,
@@ -18,15 +20,30 @@ from chiklisp._chiklisp import (
 sys.modules[f"{__name__}.binutils"] = _binutils
 binutils = _binutils
 
+
+class DebugCompileArtifact(TypedDict):
+    export_name: str | None
+    program: bytes
+    debug: bytes
+    symbols: dict[str, str]
+
+
+class DebugCompileResult(TypedDict):
+    artifacts: list[DebugCompileArtifact]
+
+
 __all__ = [
     "CldbError",
     "CompError",
+    "DebugCompileArtifact",
+    "DebugCompileResult",
     "PythonRunStep",
     "binutils",
     "call_tool",
     "check_dependencies",
     "compile",
     "compile_clvk",
+    "compile_debug",
     "compose_run_function",
     "get_version",
     "launch_tool",

@@ -10,13 +10,16 @@ chiklisp
 
 Theory of operation of the modern compiler: ./HOW_CHIKLISP_IS_COMPILED.md
 -
+The [structural debug metadata format](DEBUG_METADATA_FORMAT.md) specifies the
+binary sidecar format and includes conformance vectors for other implementations.
+
 This repo can be installed via cargo
 
     cargo install chiklisp
 
 or via pip
 
-    pip install chiklisp@git+https://github.com/Chik-Network/clvk_tools_rs.git@e17412032aa7d3b8b1d1f931893fb5802eee626a
+    python -m pip install --upgrade chiklisp
 
 Note: `pip` installs a subset of the tools installed by `cargo`, including `brun`, `run`, `opc` and `opd`.
 

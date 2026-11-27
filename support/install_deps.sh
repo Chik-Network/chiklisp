@@ -12,7 +12,7 @@ git clone https://github.com/Chik-Network/clvk.git --branch=main --single-branch
 python -m pip install ./clvk
 
 echo "installing clvk_rs via pip"
-pip install clvk_rs
+pip install clvk_rs==0.22.0
 
 echo "installing clvk_tools for clvk tests"
 

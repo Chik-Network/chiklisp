@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-15-intel, ubuntu-latest, windows-latest]
-        python: ['3.10', 3.11, 3.12]
+        python: ['3.11', '3.12', '3.13', '3.14']
 
     steps:
     - uses: actions/checkout@v7
@@ -32,11 +32,11 @@ jobs:
         fetch-depth: 0
 
     - name: Set up rust
-      uses: actions-rs/toolchain@v1
+      uses: dtolnay/rust-toolchain@stable
       with:
         toolchain: 1.97.1
 
-    - uses: actions/setup-python@v6
+    - uses: actions/setup-python@v7
       name: Install Python ${{ matrix.python }}
       with:
         python-version: ${{ matrix.python }}
@@ -89,7 +89,6 @@ jobs:
     - name: Install other wheels
       run: |
         python -m pip install pytest
-        python -m pip install blspy
 
     - name: install clvk & clvk_tools
       run: |
@@ -97,7 +96,7 @@ jobs:
         python -m pip install ./clvk
 
         echo "installing clvk_rs via pip"
-        pip install clvk_rs
+        pip install clvk_rs==0.22.0
 
         # Ensure clvk_tools is installed from its own repo.
         echo "installing clvk_tools for clvk tests"
@@ -107,17 +106,30 @@ jobs:
         # Install chiklisp pkg as "clvk_tools_rs" for older test framework
         pip uninstall -v -y clvk_tools_rs
         pip install chiklisp
-        pip install -e ./tmp
+        pip install --find-links target/wheels/ -e ./tmp
 
 
     - name: Ensure clvk, clvk_rs, chiklisp are installed
+      shell: python
       run: |
-        python -c 'import clvk; print("clvk:", clvk.__file__)'
-        python -c 'import clvk_rs; print("clvk_rs", clvk_rs.__file__)'
-        python -c 'import chiklisp; print("chiklisp:", chiklisp.__file__)'
-        python -c 'import clvk_tools_rs; print("clvk_tools_rs:", clvk_tools_rs.__file__)'
-        echo "CLVK_TOOLS_RS_VERSION=$(python -c 'import clvk_tools_rs; print(clvk_tools_rs.get_version())')" >> "$GITHUB_ENV"
-        echo "CHIKLISP_VERSION=$(python -c 'import chiklisp; print(chiklisp.get_version())')" >> "$GITHUB_ENV"
+        import os
+        import tomllib
+        from importlib.metadata import version
+        import clvk
+        import clvk_rs
+        import chiklisp
+        import clvk_tools_rs
+
+        for module in (clvk, clvk_rs, chiklisp, clvk_tools_rs):
+            print(module.__name__, module.__file__)
+        with open("Cargo.toml", "rb") as manifest_file:
+            manifest = tomllib.load(manifest_file)
+        expected_version = manifest["package"]["version"]
+        assert version("chiklisp") == chiklisp.get_version() == expected_version
+        assert clvk_tools_rs.get_version() == expected_version
+        assert version("clvk_rs") == manifest["dependencies"]["clvkr"]["version"]
+        with open(os.environ["GITHUB_ENV"], "a") as environment_file:
+            environment_file.write(f"CHIKLISP_VERSION={expected_version}\n")
 
     # Test cldb output both run from python and via its command line tool.
     - name: "Run step run tests"
@@ -128,7 +140,7 @@ jobs:
         # have happened due to pulling in the trunk versions of other packages that
         # depend on chiklisp.
         pip install --no-index --find-links target/wheels/ chiklisp
-        pip install clvk_rs
+        pip install clvk_rs==0.22.0
         pip install clvk_tools
         cd resources/tests
         python test_clvk_step.py
@@ -174,9 +186,9 @@ jobs:
         pip install -v --no-index --find-links target/wheels/ chiklisp && \
         pip uninstall -v -y clvk_tools_rs && \
         echo "PWD:" $(pwd) && \
-        pip install -e ./tmp && \
+        pip install --find-links target/wheels/ -e ./tmp && \
         (cd chik_puzzles && export PYTHONPATH=${PYTHONPATH}:$(pwd) && \
-        ./verify_compiler_version.sh ${CLVK_TOOLS_RS_VERSION} && . .venv/bin/activate && \
+        ./verify_compiler_version.sh ${CHIKLISP_VERSION} && . .venv/bin/activate && \
         echo "Running check" && \
         python chik_puzzles_py/manage_clvk.py check && \
         echo "Check successful")
@@ -315,7 +327,7 @@ jobs:
 
     - name: Configure AWS credentials
       if: steps.check_secrets.outputs.HAS_AWS_SECRET
-      uses: aws-actions/configure-aws-credentials@v6.2.4
+      uses: aws-actions/configure-aws-credentials@v6.3.0
       with:
         role-to-assume: arn:aws:iam::${{ secrets.CHIK_AWS_ACCOUNT_ID }}:role/installer-upload
         aws-region: us-west-2
@@ -393,7 +405,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Install rust
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
             toolchain: 1.97.1
             components: rustfmt, clippy
@@ -404,7 +416,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
             toolchain: 1.97.1
       - name: Install coverage tools

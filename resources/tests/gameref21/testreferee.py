@@ -14,10 +14,9 @@ from chik.types.mempool_inclusion_status import MempoolInclusionStatus
 from chik.util.errors import Err
 from dataclasses import dataclass
 from typing import Any
-from chik_rs import Coin
+from chik_rs import Coin, G2Element
 from chik.types.spend_bundle import SpendBundle
 from chik.types.coin_spend import CoinSpend
-from blspy import G2Element
 
 from steprun import diag_run_clvk, compile_module_with_symbols
 
